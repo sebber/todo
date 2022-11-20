@@ -68,11 +68,12 @@ model VerificationToken {
 }
 
 model TodoList {
-  id      String @id @default(cuid())
-  name    String @default("New Todo List")
-  todos   Todo[]
-  owner   User   @relation(fields: [ownerId], references: [id])
-  ownerId String
+  id         String    @id @default(cuid())
+  name       String    @default("New Todo List")
+  todos      Todo[]
+  owner      User      @relation(fields: [ownerId], references: [id])
+  ownerId    String
+  archivedAt DateTime?
 }
 
 model Todo {
