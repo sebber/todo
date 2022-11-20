@@ -29,11 +29,9 @@ const AuthenticatedMenu = () => {
 
 const UnauthenticatedMenu = () => {
   return (
-    <>
-      <button onClick={() => signIn()} className={linkClassname}>
-        Sign in
-      </button>
-    </>
+    <button onClick={() => signIn()} className={linkClassname}>
+      Sign in
+    </button>
   );
 };
 
@@ -73,10 +71,10 @@ export const MainLayout = ({ children }: Props): JSX.Element => {
       <div className="flex flex-row justify-evenly  p-2">
         <Logo />
         <nav className="flex flex-1 items-center justify-center">
-          {session ? <AuthenticatedMenu /> : <UnauthenticatedMenu />}
+          {session ? <AuthenticatedMenu /> : null}
         </nav>
         <div className="flex flex-1 justify-end">
-          <HeaderProfile />
+          {session ? <HeaderProfile /> : <UnauthenticatedMenu />}
         </div>
       </div>
       <div>{children}</div>
