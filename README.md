@@ -17,3 +17,9 @@ Built for self-educational purposes.
 5. ???
 
 6. Profit!
+
+## Roadmap/Ideas of improvements
+
+- Users should be able to delete and/or archive lists and todos
+- Users should have other signup methods
+- Users should be able to share lists with other users
