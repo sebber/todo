@@ -41,7 +41,7 @@ export const MainLayout = ({ children }: Props): JSX.Element => {
     <div className="h-full w-full">
       <div className="flex flex-row justify-evenly  p-2">
         <div className="font-family-nice flex flex-1 justify-start text-2xl font-light text-indigo-400">
-          <Link href="/">T3 Todo</Link>
+          <Link href="/">Todo</Link>
         </div>
         <nav className="flex flex-1 items-center justify-center">
           {session ? (
