@@ -10,11 +10,23 @@ export const todoRouter = router({
       },
     });
   }),
+  archiveTodoList: protectedProcedure
+    .input(z.object({ id: z.string() }))
+    .mutation(({ ctx, input }) => {
+      return ctx.prisma.todoList.update({
+        where: { id: input.id },
+        data: { archivedAt: new Date() },
+      });
+    }),
   changeTitle: protectedProcedure
     .input(z.object({ todoListId: z.string(), name: z.string() }))
     .mutation(({ ctx, input }) => {
       return ctx.prisma.todoList.updateMany({
-        where: { id: input.todoListId, ownerId: ctx.session.user.id },
+        where: {
+          id: input.todoListId,
+          ownerId: ctx.session.user.id,
+          archivedAt: null,
+        },
         data: { name: input.name },
       });
     }),
@@ -42,14 +54,14 @@ export const todoRouter = router({
     }),
   getTodoLists: protectedProcedure.query(({ ctx }) => {
     return ctx.prisma.todoList.findMany({
-      where: { ownerId: ctx.session.user.id },
+      where: { ownerId: ctx.session.user.id, archivedAt: null },
     });
   }),
   getTodoList: protectedProcedure
     .input(z.object({ id: z.string() }))
     .query(({ ctx, input }) => {
       return ctx.prisma.todoList.findFirst({
-        where: { id: input.id, ownerId: ctx.session.user.id },
+        where: { id: input.id, ownerId: ctx.session.user.id, archivedAt: null },
         include: { todos: true },
       });
     }),
