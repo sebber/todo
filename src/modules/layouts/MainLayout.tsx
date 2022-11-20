@@ -2,7 +2,6 @@ import React from "react";
 import { useSession, signOut, signIn } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
-import { CreateTodoLink } from "../todos/CreateTodoLink";
 
 interface Props {
   children: React.ReactNode;
@@ -47,14 +46,8 @@ export const MainLayout = ({ children }: Props): JSX.Element => {
         <nav className="flex flex-1 items-center justify-center">
           {session ? (
             <>
-              <CreateTodoLink className={linkClassname}>
-                New Todo
-              </CreateTodoLink>
               <Link href="/todos" className={linkClassname}>
                 Todos
-              </Link>
-              <Link href="/" className={linkClassname}>
-                Settings
               </Link>
               <button onClick={() => signOut()} className={linkClassname}>
                 Sign out
