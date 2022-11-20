@@ -14,7 +14,7 @@ const Todo = ({ id, todoListId }: { id: string; todoListId: string }) => {
   const utils = trpc.useContext();
   const markTodoAsDone = trpc.todo.markTodoAsDone.useMutation({
     onSuccess() {
-      utils.todo.invalidate({ id: todoList?.id });
+      utils.todo.getTodoList.invalidate({ id: todoListId });
     },
   });
 
@@ -175,14 +175,11 @@ const PageTitleEditForm = ({
     async onMutate(data) {
       await utils.todo.getTodoList.cancel({ id });
       const previousTodoList = utils.todo.getTodoList.getData({ id });
-      utils.todo.getTodoList.setData(
-        (todolist) => {
-          if (!todolist) return todolist;
-          return { ...todolist, name: data.name };
-        },
-        { id }
-      );
-      utils.todo.getTodoLists.setData((todolists) => {
+      utils.todo.getTodoList.setData({ id }, (todolist) => {
+        if (!todolist) return todolist;
+        return { ...todolist, name: data.name };
+      });
+      utils.todo.getTodoLists.setData(undefined, (todolists) => {
         const listIndex = todolists?.findIndex(
           (list: TodoList) => list.id === id
         );
@@ -198,7 +195,7 @@ const PageTitleEditForm = ({
       return { previousTodoList };
     },
     onError(_err, _data, context) {
-      utils.todo.getTodoList.setData(context?.previousTodoList, { id });
+      utils.todo.getTodoList.setData({ id }, context?.previousTodoList);
     },
     onSettled: () => {
       utils.todo.getTodoList.invalidate({ id });
