@@ -2,12 +2,10 @@ import { type NextPage } from "next";
 import Head from "next/head";
 import { useSession } from "next-auth/react";
 
-// import { trpc } from "../utils/trpc";
 import { MainLayout } from "../modules/layouts/MainLayout";
 
 const Home: NextPage = () => {
   const { data: sessionData } = useSession();
-  // const hello = trpc.example.hello.useQuery({ text: "from tRPC" });
 
   return (
     <>
