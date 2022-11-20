@@ -103,15 +103,26 @@ const TodoListBody = ({ id }: { id: string }) => {
   );
 };
 
-const TodoListFooter = ({ id }: { id: string }) => {
+export const ClearCompletedTodosButton = ({ id }: { id: string }) => {
   const utils = trpc.useContext();
-  const { data: todoList } = useTodoList(id);
   const clearCompleted = trpc.todo.clearCompleted.useMutation({
     onSuccess() {
       utils.todo.getTodoList.invalidate({ id: id });
     },
   });
 
+  return (
+    <button
+      className="nice-font-family rounded-md border px-2 font-thin text-gray-500 hover:border-gray-300 hover:bg-gray-50"
+      onClick={() => clearCompleted.mutate({ id: id })}
+    >
+      Clear completed
+    </button>
+  );
+};
+
+const TodoListFooter = ({ id }: { id: string }) => {
+  const { data: todoList } = useTodoList(id);
   const itemsLeftToDo = todoList?.todos.filter((t) => !t.done).length;
   const anyItemsAreDone = todoList?.todos.some((t) => t.done);
 
@@ -121,14 +132,7 @@ const TodoListFooter = ({ id }: { id: string }) => {
         {itemsLeftToDo} items left
       </div>
       <div>
-        {anyItemsAreDone ? (
-          <button
-            className="nice-font-family rounded-md border px-2 font-thin text-gray-500 hover:border-gray-300 hover:bg-gray-50"
-            onClick={() => clearCompleted.mutate({ id: id })}
-          >
-            Clear completed
-          </button>
-        ) : null}
+        {anyItemsAreDone ? <ClearCompletedTodosButton id={id} /> : null}
       </div>
     </div>
   );
