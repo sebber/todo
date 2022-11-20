@@ -2,8 +2,32 @@ import { type NextPage } from "next";
 import Link from "next/link";
 import { MainLayout } from "../layouts/MainLayout";
 import useTodoLists from "./useTodoLists";
-import { FaAngleRight } from "react-icons/fa";
+import { FaAngleRight, FaArchive } from "react-icons/fa";
 import { CreateTodoLink } from "./CreateTodoLink";
+import { trpc } from "../../utils/trpc";
+
+const ArchiveTodoListButton = ({ id }: { id: string }) => {
+  const utils = trpc.useContext();
+  const archiveTodoList = trpc.todo.archiveTodoList.useMutation({
+    onMutate(variables) {
+      console.log("archiveTodoList - onMutate", { variables });
+    },
+    onSuccess(data, variables, context) {
+      console.log("archiveTodoList - onMutate", { data, variables, context });
+      utils.todo.getTodoList.invalidate({ id: id });
+      utils.todo.getTodoLists.invalidate();
+    },
+  });
+
+  return (
+    <button
+      onClick={() => archiveTodoList.mutate({ id: id })}
+      className="invisible absolute right-4 justify-self-end rounded-md border p-2 hover:bg-white group-hover:visible"
+    >
+      <FaArchive />
+    </button>
+  );
+};
 
 const TodoListDisplay = ({ id }: { id: string }) => {
   const { data: todoLists } = useTodoLists();
@@ -14,12 +38,15 @@ const TodoListDisplay = ({ id }: { id: string }) => {
   }
 
   return (
-    <div className="flex flex-row items-center border-b bg-white p-4 hover:bg-gray-50">
-      <FaAngleRight className="text-gray-500" />
-      <span className="nice-font-family ml-2 text-xl font-extralight text-gray-500">
-        {todo.name}
-      </span>
-    </div>
+    <Link href={`/todos/${id}`}>
+      <div className="group relative flex flex-row items-center justify-between border-b bg-white p-4 hover:bg-gray-50">
+        <FaAngleRight className="text-gray-500" />
+        <span className="nice-font-family ml-2 flex grow text-xl font-extralight text-gray-500">
+          {todo.name}
+        </span>
+        <ArchiveTodoListButton id={id} />
+      </div>
+    </Link>
   );
 };
 
@@ -29,9 +56,7 @@ const TodoListsDisplay = () => {
   return (
     <>
       {todoLists?.map((list) => (
-        <Link key={list.id} href={`/todos/${list.id}`}>
-          <TodoListDisplay key={list.id} id={list.id} />
-        </Link>
+        <TodoListDisplay key={list.id} id={list.id} />
       ))}
     </>
   );
