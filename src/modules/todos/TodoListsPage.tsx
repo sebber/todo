@@ -49,14 +49,12 @@ export const CreateTodoLinkButton = () => {
 export const TodoListsPage: NextPage = () => {
   return (
     <MainLayout>
-      <div className="mx-auto mt-8 flex max-w-full flex-col justify-center lg:w-2/3">
-        <PageTitle>Your Todo Lists</PageTitle>
-        <div className="flex flex-row">
-          <CreateTodoLinkButton />
-        </div>
-        <div className="my-4 w-full rounded-md bg-gray-100 shadow-xl">
-          <TodoListsDisplay />
-        </div>
+      <PageTitle>Your Todo Lists</PageTitle>
+      <div className="flex flex-row">
+        <CreateTodoLinkButton />
+      </div>
+      <div className="my-4 w-full rounded-md bg-gray-100 shadow-xl">
+        <TodoListsDisplay />
       </div>
     </MainLayout>
   );
