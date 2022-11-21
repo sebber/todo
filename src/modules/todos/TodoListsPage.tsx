@@ -4,6 +4,7 @@ import { MainLayout } from "../layouts/MainLayout";
 import useTodoLists from "./useTodoLists";
 import { FaAngleRight } from "react-icons/fa";
 import { Button } from "../style/buttons/button";
+import { PageTitle } from "../style/text/PageTitle";
 
 const TodoListDisplay = ({ id }: { id: string }) => {
   const { data: todoLists } = useTodoLists();
@@ -49,9 +50,7 @@ export const TodoListsPage: NextPage = () => {
   return (
     <MainLayout>
       <div className="mx-auto mt-8 flex max-w-full flex-col justify-center lg:w-2/3">
-        <h1 className="font-family-nice text-center text-6xl font-thin text-rose-400">
-          Your Todo Lists
-        </h1>
+        <PageTitle>Your Todo Lists</PageTitle>
         <div className="flex flex-row">
           <CreateTodoLinkButton />
         </div>

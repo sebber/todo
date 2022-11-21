@@ -7,6 +7,7 @@ import { FaAngleDown } from "react-icons/fa";
 import { trpc } from "../../utils/trpc";
 import { MainLayout } from "../layouts/MainLayout";
 import useTodoList from "./useTodoList";
+import { PageTitle } from "../style/text/PageTitle";
 
 const Todo = ({ id, todoListId }: { id: string; todoListId: string }) => {
   const { data: todoList } = useTodoList(todoListId);
@@ -160,11 +161,7 @@ const TodoListPageTitle = ({ id }: { id: string }) => {
 
 const PageTitleDisplay = ({ id }: { id: string }) => {
   const { data: todoList } = useTodoList(id);
-  return (
-    <h1 className="font-family-nice text-center text-6xl font-thin text-rose-400">
-      {todoList?.name}
-    </h1>
-  );
+  return <PageTitle>{todoList?.name}</PageTitle>;
 };
 const PageTitleEditForm = ({
   id,
