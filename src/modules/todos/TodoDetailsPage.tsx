@@ -27,7 +27,7 @@ const Todo = ({ id, todoListId }: { id: string; todoListId: string }) => {
       <input
         id={`todo-input-${todo.id}`}
         type="checkbox"
-        checked={todo.done}
+        defaultChecked={todo.done}
         className="hidden"
         onClick={() =>
           !markTodoAsDone.isLoading &&
