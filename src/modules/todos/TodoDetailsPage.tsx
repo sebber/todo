@@ -212,11 +212,9 @@ export const TodoDetailsPage: NextPage = () => {
 
   return (
     <MainLayout>
-      <div className="mx-auto mt-8 max-w-full px-4 pb-8 md:w-4/6">
-        <TodoListPageTitle id={id} />
-        <div className="my-4 w-full rounded-md bg-gray-100 shadow-xl">
-          <TodoListDisplay id={id} />
-        </div>
+      <TodoListPageTitle id={id} />
+      <div className="my-4 w-full rounded-md bg-gray-100 shadow-xl">
+        <TodoListDisplay id={id} />
       </div>
     </MainLayout>
   );

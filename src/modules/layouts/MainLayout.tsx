@@ -77,7 +77,9 @@ export const MainLayout = ({ children }: Props): JSX.Element => {
           {session ? <HeaderProfile /> : <UnauthenticatedMenu />}
         </div>
       </div>
-      <div>{children}</div>
+      <div className="mx-auto mt-8 flex max-w-full flex-col justify-center p-4 lg:w-2/3">
+        {children}
+      </div>
     </div>
   );
 };
