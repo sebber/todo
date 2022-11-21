@@ -1,3 +1,4 @@
+import type { TodoList } from "@prisma/client";
 import { useRouter } from "next/router";
 import { useMemo } from "react";
 import { trpc } from "../../utils/trpc";
@@ -43,6 +44,49 @@ export function useCreateTodoList() {
   return trpc.todo.createTodoList.useMutation({
     onSuccess(data) {
       router.push(`/todos/${data.id}`);
+    },
+  });
+}
+
+export function useChangeTodoListTitle() {
+  const utils = trpc.useContext();
+  return trpc.todo.changeTitle.useMutation({
+    async onMutate({ id, name }) {
+      await utils.todo.getTodoList.cancel({ id: id });
+      const previousTodoList = utils.todo.getTodoList.getData({ id });
+      utils.todo.getTodoList.setData({ id }, (todolist) => {
+        if (!todolist) return todolist;
+        return { ...todolist, name };
+      });
+      utils.todo.getTodoLists.setData(undefined, (todolists) => {
+        const listIndex = todolists?.findIndex(
+          (list: TodoList) => list.id === id
+        );
+        if (listIndex === undefined) return todolists;
+
+        const list = todolists?.[listIndex];
+        if (!list) return todolists;
+
+        return Object.assign([], todolists, {
+          listIndex: { ...list, name: name },
+        });
+      });
+      return { previousTodoList };
+    },
+    onError(_err, { id }, context) {
+      utils.todo.getTodoList.setData({ id }, context?.previousTodoList);
+    },
+    onSettled: (_data, _err, variables) => {
+      utils.todo.getTodoList.invalidate({ id: variables.id });
+    },
+  });
+}
+
+export function useAddTodo(id: string) {
+  const utils = trpc.useContext();
+  return trpc.todo.addTodo.useMutation({
+    onSuccess() {
+      utils.todo.getTodoList.invalidate({ id });
     },
   });
 }

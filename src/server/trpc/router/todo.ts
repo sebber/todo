@@ -16,10 +16,10 @@ export const todoRouter = router({
       return ctx.prisma.todoList.delete({ where: { id: input.id } });
     }),
   changeTitle: protectedProcedure
-    .input(z.object({ todoListId: z.string(), name: z.string() }))
+    .input(z.object({ id: z.string(), name: z.string() }))
     .mutation(({ ctx, input }) => {
       return ctx.prisma.todoList.updateMany({
-        where: { id: input.todoListId, ownerId: ctx.session.user.id },
+        where: { id: input.id, ownerId: ctx.session.user.id },
         data: { name: input.name },
       });
     }),
