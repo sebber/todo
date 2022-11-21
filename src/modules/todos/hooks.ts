@@ -29,11 +29,11 @@ export function useTodo(id: string, todoListId: string) {
   return todo;
 }
 
-export function useClearCompletedTodos(todoListId: string) {
+export function useClearCompletedTodos() {
   const utils = trpc.useContext();
   return trpc.todo.clearCompleted.useMutation({
-    onSuccess() {
-      utils.todo.getTodoList.invalidate({ id: todoListId });
+    onSuccess(_data, variables) {
+      utils.todo.getTodoList.invalidate({ id: variables.id });
     },
   });
 }

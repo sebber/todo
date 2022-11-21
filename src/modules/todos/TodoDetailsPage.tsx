@@ -107,7 +107,7 @@ const TodoListBody = ({ id }: { id: string }) => {
 };
 
 export const ClearCompletedTodosButton = ({ id }: { id: string }) => {
-  const clearCompletedTodos = useClearCompletedTodos(id);
+  const clearCompletedTodos = useClearCompletedTodos();
 
   return (
     <Button onClick={() => clearCompletedTodos.mutate({ id: id })}>
