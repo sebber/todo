@@ -6,6 +6,7 @@ import { useForm } from "react-hook-form";
 import { FaAngleDown } from "react-icons/fa";
 import { trpc } from "../../utils/trpc";
 import { MainLayout } from "../layouts/MainLayout";
+import { Button } from "../style/buttons/Button";
 import { PageTitle } from "../style/text/PageTitle";
 import {
   useClearCompletedTodos,
@@ -107,12 +108,9 @@ export const ClearCompletedTodosButton = ({ id }: { id: string }) => {
   const clearCompletedTodos = useClearCompletedTodos(id);
 
   return (
-    <button
-      className="nice-font-family rounded-md border px-2 font-thin text-gray-500 hover:border-gray-300 hover:bg-gray-50"
-      onClick={() => clearCompletedTodos.mutate({ id: id })}
-    >
+    <Button onClick={() => clearCompletedTodos.mutate({ id: id })}>
       Clear completed
-    </button>
+    </Button>
   );
 };
 
