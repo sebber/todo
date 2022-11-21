@@ -29,11 +29,11 @@ export function useTodo(id: string, todoListId: string) {
   return todo;
 }
 
-export function useClearCompletedTodos(todoListId: string) {
+export function useClearCompletedTodos() {
   const utils = trpc.useContext();
   return trpc.todo.clearCompleted.useMutation({
-    onSuccess() {
-      utils.todo.getTodoList.invalidate({ id: todoListId });
+    onSuccess(_data, variables) {
+      utils.todo.getTodoList.invalidate({ id: variables.id });
     },
   });
 }
@@ -43,6 +43,18 @@ export function useCreateTodoList() {
   return trpc.todo.createTodoList.useMutation({
     onSuccess(data) {
       router.push(`/todos/${data.id}`);
+    },
+  });
+}
+
+export function useDeleteTodoList() {
+  const router = useRouter();
+  const utils = trpc.useContext();
+  return trpc.todo.deleteTodoList.useMutation({
+    onSuccess(_data, variables) {
+      utils.todo.getTodoList.invalidate({ id: variables.id });
+      utils.todo.getTodoLists.invalidate();
+      router.push(`/todos`);
     },
   });
 }

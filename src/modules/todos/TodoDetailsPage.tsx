@@ -6,10 +6,12 @@ import { useForm } from "react-hook-form";
 import { FaAngleDown } from "react-icons/fa";
 import { trpc } from "../../utils/trpc";
 import { MainLayout } from "../layouts/MainLayout";
+import { AngryButton } from "../style/buttons/AngryButton";
 import { Button } from "../style/buttons/Button";
 import { PageTitle } from "../style/text/PageTitle";
 import {
   useClearCompletedTodos,
+  useDeleteTodoList,
   useMarkTodoAsDone,
   useTodo,
   useTodoList,
@@ -105,12 +107,22 @@ const TodoListBody = ({ id }: { id: string }) => {
 };
 
 export const ClearCompletedTodosButton = ({ id }: { id: string }) => {
-  const clearCompletedTodos = useClearCompletedTodos(id);
+  const clearCompletedTodos = useClearCompletedTodos();
 
   return (
     <Button onClick={() => clearCompletedTodos.mutate({ id: id })}>
       Clear completed
     </Button>
+  );
+};
+
+export const DeleteTodoListButton = ({ id }: { id: string }) => {
+  const deleteTodoList = useDeleteTodoList();
+
+  return (
+    <AngryButton onClick={() => deleteTodoList.mutate({ id: id })}>
+      Delete List
+    </AngryButton>
   );
 };
 
@@ -124,8 +136,9 @@ const TodoListFooter = ({ id }: { id: string }) => {
       <div className="nice-font-family px-2 font-thin text-gray-500">
         {itemsLeftToDo} items left
       </div>
-      <div>
+      <div className="space-between">
         {anyItemsAreDone ? <ClearCompletedTodosButton id={id} /> : null}
+        <DeleteTodoListButton id={id} />
       </div>
     </div>
   );
