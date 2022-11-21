@@ -2,7 +2,7 @@ import { type NextPage } from "next";
 import Link from "next/link";
 import { MainLayout } from "../layouts/MainLayout";
 import { FaAngleRight } from "react-icons/fa";
-import { Button } from "../style/buttons/button";
+import { Button } from "../style/buttons/Button";
 import { PageTitle } from "../style/text/PageTitle";
 import { useCreateTodoList, useTodoLists } from "./hooks";
 
