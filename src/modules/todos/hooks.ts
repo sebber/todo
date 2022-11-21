@@ -47,6 +47,15 @@ export function useCreateTodoList() {
   });
 }
 
+export function useAddTodo(id: string) {
+  const utils = trpc.useContext();
+  return trpc.todo.addTodo.useMutation({
+    onSuccess() {
+      utils.todo.getTodoList.invalidate({ id });
+    },
+  });
+}
+
 export function useDeleteTodoList() {
   const router = useRouter();
   const utils = trpc.useContext();

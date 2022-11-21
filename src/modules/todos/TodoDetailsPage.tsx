@@ -10,6 +10,7 @@ import { AngryButton } from "../style/buttons/AngryButton";
 import { Button } from "../style/buttons/Button";
 import { PageTitle } from "../style/text/PageTitle";
 import {
+  useAddTodo,
   useClearCompletedTodos,
   useDeleteTodoList,
   useMarkTodoAsDone,
@@ -58,13 +59,7 @@ const TodoListDisplay = ({ id }: { id: string }) => {
 };
 
 const TodoListHeader = ({ id }: { id: string }) => {
-  const utils = trpc.useContext();
-  const addTodo = trpc.todo.addTodo.useMutation({
-    onSuccess() {
-      utils.todo.getTodoList.invalidate({ id });
-    },
-  });
-
+  const addTodo = useAddTodo(id);
   const { register, handleSubmit, reset, formState } = useForm<
     Pick<Todo, "text">
   >({ defaultValues: { text: "" } });
