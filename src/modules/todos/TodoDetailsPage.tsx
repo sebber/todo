@@ -4,13 +4,13 @@ import { useRouter } from "next/router";
 import { useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { FaAngleDown } from "react-icons/fa";
-import { trpc } from "../../utils/trpc";
 import { MainLayout } from "../layouts/MainLayout";
 import { AngryButton } from "../style/buttons/AngryButton";
 import { Button } from "../style/buttons/Button";
 import { PageTitle } from "../style/text/PageTitle";
 import {
   useAddTodo,
+  useChangeTodoListTitle,
   useClearCompletedTodos,
   useDeleteTodoList,
   useMarkTodoAsDone,
@@ -171,44 +171,14 @@ const PageTitleEditForm = ({
   onComplete: () => void;
 }) => {
   const { data: todolist } = useTodoList(id);
-  const utils = trpc.useContext();
-  const changeTitle = trpc.todo.changeTitle.useMutation({
-    async onMutate(data) {
-      await utils.todo.getTodoList.cancel({ id });
-      const previousTodoList = utils.todo.getTodoList.getData({ id });
-      utils.todo.getTodoList.setData({ id }, (todolist) => {
-        if (!todolist) return todolist;
-        return { ...todolist, name: data.name };
-      });
-      utils.todo.getTodoLists.setData(undefined, (todolists) => {
-        const listIndex = todolists?.findIndex(
-          (list: TodoList) => list.id === id
-        );
-        if (listIndex === undefined) return todolists;
-
-        const list = todolists?.[listIndex];
-        if (!list) return todolists;
-
-        return Object.assign([], todolists, {
-          listIndex: { ...list, name: data.name },
-        });
-      });
-      return { previousTodoList };
-    },
-    onError(_err, _data, context) {
-      utils.todo.getTodoList.setData({ id }, context?.previousTodoList);
-    },
-    onSettled: () => {
-      utils.todo.getTodoList.invalidate({ id });
-    },
-  });
+  const changeTitle = useChangeTodoListTitle();
   const { register, handleSubmit } = useForm<Pick<TodoList, "name">>({
     defaultValues: { name: todolist?.name },
   });
   const nameInputRef = useRef<HTMLInputElement | null>(null);
 
   const onSubmit = (data: Pick<TodoList, "name">) => {
-    changeTitle.mutate({ todoListId: id, name: data.name });
+    changeTitle.mutate({ id, name: data.name });
     onComplete();
   };
 
