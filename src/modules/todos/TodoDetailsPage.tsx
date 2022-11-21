@@ -6,18 +6,17 @@ import { useForm } from "react-hook-form";
 import { FaAngleDown } from "react-icons/fa";
 import { trpc } from "../../utils/trpc";
 import { MainLayout } from "../layouts/MainLayout";
-import useTodoList from "./useTodoList";
 import { PageTitle } from "../style/text/PageTitle";
+import {
+  useClearCompletedTodos,
+  useMarkTodoAsDone,
+  useTodo,
+  useTodoList,
+} from "./hooks";
 
 const Todo = ({ id, todoListId }: { id: string; todoListId: string }) => {
-  const { data: todoList } = useTodoList(todoListId);
-  const todo = todoList?.todos.find((todo) => todo.id === id);
-  const utils = trpc.useContext();
-  const markTodoAsDone = trpc.todo.markTodoAsDone.useMutation({
-    onSuccess() {
-      utils.todo.getTodoList.invalidate({ id: todoListId });
-    },
-  });
+  const todo = useTodo(id, todoListId);
+  const markTodoAsDone = useMarkTodoAsDone();
 
   if (!todo) {
     return null;
@@ -105,17 +104,12 @@ const TodoListBody = ({ id }: { id: string }) => {
 };
 
 export const ClearCompletedTodosButton = ({ id }: { id: string }) => {
-  const utils = trpc.useContext();
-  const clearCompleted = trpc.todo.clearCompleted.useMutation({
-    onSuccess() {
-      utils.todo.getTodoList.invalidate({ id: id });
-    },
-  });
+  const clearCompletedTodos = useClearCompletedTodos(id);
 
   return (
     <button
       className="nice-font-family rounded-md border px-2 font-thin text-gray-500 hover:border-gray-300 hover:bg-gray-50"
-      onClick={() => clearCompleted.mutate({ id: id })}
+      onClick={() => clearCompletedTodos.mutate({ id: id })}
     >
       Clear completed
     </button>

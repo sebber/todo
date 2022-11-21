@@ -1,10 +1,10 @@
 import { type NextPage } from "next";
 import Link from "next/link";
 import { MainLayout } from "../layouts/MainLayout";
-import useTodoLists from "./useTodoLists";
 import { FaAngleRight } from "react-icons/fa";
 import { Button } from "../style/buttons/button";
 import { PageTitle } from "../style/text/PageTitle";
+import { useCreateTodoList, useTodoLists } from "./hooks";
 
 const TodoListDisplay = ({ id }: { id: string }) => {
   const { data: todoLists } = useTodoLists();
@@ -54,7 +54,6 @@ export const TodoListsPage: NextPage = () => {
         <div className="flex flex-row">
           <CreateTodoLinkButton />
         </div>
-
         <div className="my-4 w-full rounded-md bg-gray-100 shadow-xl">
           <TodoListsDisplay />
         </div>
