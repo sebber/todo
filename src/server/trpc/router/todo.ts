@@ -10,6 +10,11 @@ export const todoRouter = router({
       },
     });
   }),
+  deleteTodoList: protectedProcedure
+    .input(z.object({ id: z.string() }))
+    .mutation(({ ctx, input }) => {
+      return ctx.prisma.todoList.delete({ where: { id: input.id } });
+    }),
   changeTitle: protectedProcedure
     .input(z.object({ todoListId: z.string(), name: z.string() }))
     .mutation(({ ctx, input }) => {
