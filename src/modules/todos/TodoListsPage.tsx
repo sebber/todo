@@ -1,9 +1,10 @@
 import { type NextPage } from "next";
 import Link from "next/link";
 import { MainLayout } from "../layouts/MainLayout";
-import useTodoLists from "./useTodoLists";
 import { FaAngleRight } from "react-icons/fa";
-import { CreateTodoLink } from "./CreateTodoLink";
+import { Button } from "../style/buttons/button";
+import { PageTitle } from "../style/text/PageTitle";
+import { useCreateTodoList, useTodoLists } from "./hooks";
 
 const TodoListDisplay = ({ id }: { id: string }) => {
   const { data: todoLists } = useTodoLists();
@@ -37,19 +38,22 @@ const TodoListsDisplay = () => {
   );
 };
 
+export const CreateTodoLinkButton = () => {
+  const createTodoList = useCreateTodoList();
+
+  return (
+    <Button onClick={() => createTodoList.mutate()}>Make a new list</Button>
+  );
+};
+
 export const TodoListsPage: NextPage = () => {
   return (
     <MainLayout>
       <div className="mx-auto mt-8 flex max-w-full flex-col justify-center lg:w-2/3">
-        <h1 className="font-family-nice text-center text-6xl font-thin text-rose-400">
-          Your Todo Lists
-        </h1>
+        <PageTitle>Your Todo Lists</PageTitle>
         <div className="flex flex-row">
-          <CreateTodoLink className="nice-font-family mt-4 rounded-md border border-gray-300 px-2 font-thin text-gray-500 hover:bg-gray-50">
-            Make a new list
-          </CreateTodoLink>
+          <CreateTodoLinkButton />
         </div>
-
         <div className="my-4 w-full rounded-md bg-gray-100 shadow-xl">
           <TodoListsDisplay />
         </div>
