@@ -108,12 +108,9 @@ export const ClearCompletedTodosButton = ({ id }: { id: string }) => {
   const clearCompletedTodos = useClearCompletedTodos(id);
 
   return (
-    <button
-      className="nice-font-family rounded-md border px-2 font-thin text-gray-500 hover:border-gray-300 hover:bg-gray-50"
-      onClick={() => clearCompletedTodos.mutate({ id: id })}
-    >
+    <Button onClick={() => clearCompletedTodos.mutate({ id: id })}>
       Clear completed
-    </button>
+    </Button>
   );
 };
 
