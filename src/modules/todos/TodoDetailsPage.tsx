@@ -1,7 +1,7 @@
 import { type Todo, type TodoList } from "@prisma/client";
 import { type NextPage } from "next";
 import { useRouter } from "next/router";
-import { useRef, useState } from "react";
+import { useRef, useState, type HTMLAttributes } from "react";
 import { useForm } from "react-hook-form";
 import { FaAngleDown } from "react-icons/fa";
 import { MainLayout } from "../layouts/MainLayout";
@@ -13,14 +13,62 @@ import {
   useChangeTodoListTitle,
   useClearCompletedTodos,
   useDeleteTodoList,
+  useEditTodoText,
   useMarkTodoAsDone,
   useTodo,
   useTodoList,
 } from "./hooks";
 
+const TodoTextEditForm = ({
+  id,
+  todoListId,
+  defaultText,
+  onComplete,
+}: {
+  id: string;
+  todoListId: string;
+  defaultText: string;
+  onComplete: () => void;
+}) => {
+  const editTodoText = useEditTodoText(todoListId);
+  const { register, handleSubmit } = useForm<Pick<Todo, "text">>({
+    defaultValues: { text: defaultText },
+  });
+  const onSubmit = (data: Pick<Todo, "text">) => {
+    editTodoText.mutate({ id, text: data.text });
+    onComplete();
+  };
+
+  return (
+    <form onSubmit={handleSubmit(onSubmit)}>
+      <input
+        className="nice-font-family pl-12 text-xl font-extralight text-gray-500"
+        type="text"
+        autoFocus
+        {...register("text", { onBlur: onComplete })}
+      />
+    </form>
+  );
+};
+
+const TodoTextLabel = ({
+  children,
+  ...props
+}: { children: string } & HTMLAttributes<HTMLLabelElement>) => {
+  return (
+    <label
+      {...props}
+      className="nice-font-family pl-12 text-xl font-extralight text-gray-500"
+    >
+      {children}
+    </label>
+  );
+};
+
 const Todo = ({ id, todoListId }: { id: string; todoListId: string }) => {
   const todo = useTodo(id, todoListId);
   const markTodoAsDone = useMarkTodoAsDone();
+  const [isEditing, setIsEditing] = useState(false);
 
   if (!todo) {
     return null;
@@ -38,12 +86,18 @@ const Todo = ({ id, todoListId }: { id: string; todoListId: string }) => {
           markTodoAsDone.mutate({ id: todo.id, done: !todo.done })
         }
       />
-      <label
-        htmlFor={`todo-input-${todo.id}`}
-        className="nice-font-family pl-12 text-xl font-extralight text-gray-500"
-      >
-        {todo.text}
-      </label>
+      {isEditing ? (
+        <TodoTextEditForm
+          onComplete={() => setIsEditing(false)}
+          id={id}
+          todoListId={todoListId}
+          defaultText={todo.text}
+        />
+      ) : (
+        <TodoTextLabel onDoubleClick={() => setIsEditing(true)}>
+          {todo.text}
+        </TodoTextLabel>
+      )}
     </div>
   );
 };
@@ -131,7 +185,7 @@ const TodoListFooter = ({ id }: { id: string }) => {
       <div className="nice-font-family px-2 font-thin text-gray-500">
         {itemsLeftToDo} items left
       </div>
-      <div className="space-between">
+      <div className="grid grid-flow-col grid-rows-1 gap-2">
         {anyItemsAreDone ? <ClearCompletedTodosButton id={id} /> : null}
         <DeleteTodoListButton id={id} />
       </div>

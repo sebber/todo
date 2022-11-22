@@ -30,6 +30,15 @@ export function useTodo(id: string, todoListId: string) {
   return todo;
 }
 
+export function useEditTodoText(todoListId: string) {
+  const utils = trpc.useContext();
+  return trpc.todo.changeTodoText.useMutation({
+    onSuccess() {
+      utils.todo.getTodoList.invalidate({ id: todoListId });
+    },
+  });
+}
+
 export function useClearCompletedTodos() {
   const utils = trpc.useContext();
   return trpc.todo.clearCompleted.useMutation({
