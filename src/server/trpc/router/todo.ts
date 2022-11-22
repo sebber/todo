@@ -30,6 +30,14 @@ export const todoRouter = router({
         data: { todoListId: input.todoListId, text: input.text },
       });
     }),
+  changeTodoText: protectedProcedure
+    .input(z.object({ id: z.string(), text: z.string() }))
+    .mutation(({ ctx, input }) => {
+      return ctx.prisma.todo.update({
+        where: { id: input.id },
+        data: { text: input.text },
+      });
+    }),
   markTodoAsDone: protectedProcedure
     .input(z.object({ id: z.string(), done: z.boolean() }))
     .mutation(({ ctx, input }) => {
