@@ -1,12 +1,8 @@
 import { type NextPage } from "next";
 import Head from "next/head";
-import { useSession } from "next-auth/react";
-
 import { MainLayout } from "../modules/layouts/MainLayout";
 
 const Home: NextPage = () => {
-  const { data: sessionData } = useSession();
-
   return (
     <>
       <Head>
@@ -15,7 +11,7 @@ const Home: NextPage = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <MainLayout>
-        <div>{JSON.stringify(sessionData)}</div>
+        <div>Hello</div>
       </MainLayout>
     </>
   );
