@@ -6,7 +6,7 @@ export function useToggleTodo(todoListId: string) {
 
   return trpc.todo.toggle.useMutation({
     async onMutate({ id }) {
-      await utils.todo.getTodoList.cancel({ id });
+      await utils.todo.getTodoList.cancel({ id: todoListId });
       const previousTodoList = utils.todo.getTodoList.getData({
         id: todoListId,
       });
