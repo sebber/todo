@@ -137,10 +137,10 @@ export function useChangeTodoListTitle() {
     onError(_err, { id }, context) {
       utils.todo.getTodoList.setData({ id }, context?.previousTodoList);
     },
-    onSuccess(data, variables) {
-      utils.todo.getTodoList.setData({ id: variables.id }, (old) =>
-        Object.assign({}, old, data)
-      );
+    onSettled(data) {
+      if (data?.id) {
+        utils.todo.getTodoList.invalidate({ id: data.id });
+      }
     },
   });
 }
