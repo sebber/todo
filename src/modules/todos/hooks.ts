@@ -74,33 +74,36 @@ export function useCreateTodoList() {
 export function useChangeTodoListTitle() {
   const utils = trpc.useContext();
   return trpc.todo.changeTitle.useMutation({
-    async onMutate({ id, name }) {
+    async onMutate(variables) {
+      const { id, name } = variables;
       await utils.todo.getTodoList.cancel({ id: id });
       const previousTodoList = utils.todo.getTodoList.getData({ id });
-      utils.todo.getTodoList.setData({ id }, (todolist) => {
-        if (!todolist) return todolist;
-        return { ...todolist, name };
+      utils.todo.getTodoList.setData({ id }, (old) => {
+        return Object.assign({}, old, { name });
       });
-      utils.todo.getTodoLists.setData(undefined, (todolists) => {
-        const listIndex = todolists?.findIndex(
-          (list: TodoList) => list.id === id
-        );
-        if (listIndex === undefined) return todolists;
 
-        const list = todolists?.[listIndex];
-        if (!list) return todolists;
+      // utils.todo.getTodoLists.setData(undefined, (todolists) => {
+      //   const listIndex = todolists?.findIndex(
+      //     (list: TodoList) => list.id === id
+      //   );
+      //   if (listIndex === undefined) return todolists;
 
-        return Object.assign([], todolists, {
-          listIndex: { ...list, name: name },
-        });
-      });
+      //   const list = todolists?.[listIndex];
+      //   if (!list) return todolists;
+
+      //   return Object.assign([], todolists, {
+      //     listIndex: Object.assign({}, list, { name: name }),
+      //   });
+      // });
       return { previousTodoList };
     },
     onError(_err, { id }, context) {
       utils.todo.getTodoList.setData({ id }, context?.previousTodoList);
     },
-    onSettled: (_data, _err, variables) => {
-      utils.todo.getTodoList.invalidate({ id: variables.id });
+    onSuccess(data, variables) {
+      utils.todo.getTodoList.setData({ id: variables.id }, (old) =>
+        Object.assign({}, old, data)
+      );
     },
   });
 }
