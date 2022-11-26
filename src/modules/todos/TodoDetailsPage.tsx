@@ -230,8 +230,8 @@ const PageTitleEditForm = ({
     defaultValues: { name: todolist?.name },
   });
   const nameInputRef = useRef<HTMLInputElement | null>(null);
-  const onSubmit = (data: Pick<TodoList, "name">) => {
-    changeTitle.mutate({ id, name: data.name });
+  const onSubmit = async (data: Pick<TodoList, "name">) => {
+    await changeTitle.mutateAsync({ id, name: data.name });
     onComplete();
   };
   const { ref, ...field } = register("name", { onBlur: onComplete });
