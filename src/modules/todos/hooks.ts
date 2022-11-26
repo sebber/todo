@@ -81,6 +81,18 @@ export function useEditTodoText(todoListId: string) {
 export function useClearCompletedTodos() {
   const utils = trpc.useContext();
   return trpc.todo.clearCompleted.useMutation({
+    async onMutate({ id }) {
+      await utils.todo.getTodoList.cancel({ id });
+      const previousTodoList = utils.todo.getTodoList.getData({ id });
+      if (previousTodoList) {
+        utils.todo.getTodoList.setData({ id }, (old) => {
+          return Object.assign({}, old, {
+            todos: (old?.todos || []).filter((todo) => !todo.done),
+          });
+        });
+      }
+      return { previousTodoList };
+    },
     onSuccess(_data, variables) {
       utils.todo.getTodoList.invalidate({ id: variables.id });
     },
