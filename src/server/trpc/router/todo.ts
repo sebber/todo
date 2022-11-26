@@ -17,11 +17,12 @@ export const todoRouter = router({
     }),
   changeTitle: protectedProcedure
     .input(z.object({ id: z.string(), name: z.string() }))
-    .mutation(({ ctx, input }) => {
-      return ctx.prisma.todoList.updateMany({
+    .mutation(async ({ ctx, input }) => {
+      await ctx.prisma.todoList.updateMany({
         where: { id: input.id, ownerId: ctx.session.user.id },
         data: { name: input.name },
       });
+      return ctx.prisma.todoList.findUnique({ where: { id: input.id } });
     }),
   addTodo: protectedProcedure
     .input(z.object({ todoListId: z.string(), text: z.string() }))
