@@ -49,7 +49,30 @@ export function useTodo(id: string, todoListId: string) {
 export function useEditTodoText(todoListId: string) {
   const utils = trpc.useContext();
   return trpc.todo.changeTodoText.useMutation({
-    onSuccess() {
+    async onMutate(variables) {
+      await utils.todo.getTodoList.cancel({ id: todoListId });
+      const previousTodoList = utils.todo.getTodoList.getData({
+        id: todoListId,
+      });
+      if (previousTodoList) {
+        const oldTodo = previousTodoList?.todos.find(
+          (todo) => todo.id === variables.id
+        );
+        utils.todo.getTodoList.setData({ id: todoListId }, (oldTodoList) => {
+          const todoIndex = oldTodoList?.todos.findIndex(
+            (todo) => todo.id === oldTodo?.id
+          );
+          if (!todoIndex) return oldTodoList;
+          return Object.assign({}, oldTodoList, {
+            todos: Object.assign([], oldTodoList?.todos, {
+              [todoIndex]: Object.assign({}, oldTodo, { text: variables.text }),
+            }),
+          });
+        });
+      }
+      return { previousTodoList };
+    },
+    onSettled() {
       utils.todo.getTodoList.invalidate({ id: todoListId });
     },
   });
