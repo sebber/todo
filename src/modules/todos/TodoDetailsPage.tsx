@@ -14,9 +14,9 @@ import {
   useClearCompletedTodos,
   useDeleteTodoList,
   useEditTodoText,
-  useMarkTodoAsDone,
   useTodo,
   useTodoList,
+  useToggleTodo,
 } from "./hooks";
 
 const TodoTextEditForm = ({
@@ -67,7 +67,7 @@ const TodoTextLabel = ({
 
 const Todo = ({ id, todoListId }: { id: string; todoListId: string }) => {
   const todo = useTodo(id, todoListId);
-  const markTodoAsDone = useMarkTodoAsDone();
+  const toggleTodo = useToggleTodo(todoListId);
   const [isEditing, setIsEditing] = useState(false);
 
   if (!todo) {
@@ -75,16 +75,15 @@ const Todo = ({ id, todoListId }: { id: string; todoListId: string }) => {
   }
 
   return (
-    <div className="flex flex-row items-center border-b bg-white p-2 py-4">
+    <div
+      className="flex flex-row items-center border-b bg-white p-2 py-4"
+      onClick={() => toggleTodo.mutate({ id: todo.id })}
+    >
       <input
         id={`todo-input-${todo.id}`}
         type="checkbox"
-        defaultChecked={todo.done}
+        checked={todo.done}
         className="hidden"
-        onClick={() =>
-          !markTodoAsDone.isLoading &&
-          markTodoAsDone.mutate({ id: todo.id, done: !todo.done })
-        }
       />
       {isEditing ? (
         <TodoTextEditForm
@@ -217,6 +216,7 @@ const PageTitleDisplay = ({ id }: { id: string }) => {
   const { data: todoList } = useTodoList(id);
   return <PageTitle>{todoList?.name}</PageTitle>;
 };
+
 const PageTitleEditForm = ({
   id,
   onComplete,

@@ -1,12 +1,30 @@
-import type { TodoList } from "@prisma/client";
 import { useRouter } from "next/router";
 import { useMemo } from "react";
 import { trpc } from "../../utils/trpc";
 
-export function useMarkTodoAsDone() {
+export function useToggleTodo(todoListId: string) {
   const utils = trpc.useContext();
 
-  return trpc.todo.markTodoAsDone.useMutation({
+  return trpc.todo.toggle.useMutation({
+    async onMutate({ id }) {
+      await utils.todo.getTodoList.cancel({ id });
+      const previousTodoList = utils.todo.getTodoList.getData({
+        id: todoListId,
+      });
+      const oldTodo = previousTodoList?.todos.find((todo) => todo.id === id);
+
+      utils.todo.getTodoList.setData({ id: todoListId }, (oldTodoList) => {
+        const todoIndex = oldTodoList?.todos.findIndex(
+          (todo) => todo.id === oldTodo?.id
+        );
+        if (!todoIndex) return oldTodoList;
+        return Object.assign({}, oldTodoList, {
+          todos: Object.assign([], oldTodoList?.todos, {
+            [todoIndex]: Object.assign({}, oldTodo, { done: !oldTodo?.done }),
+          }),
+        });
+      });
+    },
     onSuccess(data) {
       utils.todo.getTodoList.invalidate({ id: data.todoListId });
     },
@@ -23,11 +41,7 @@ export function useTodoLists() {
 
 export function useTodo(id: string, todoListId: string) {
   const { data: todoList } = useTodoList(todoListId);
-  const todo = useMemo(
-    () => todoList?.todos.find((todo) => todo.id === id),
-    [todoList?.todos, id]
-  );
-  return todo;
+  return todoList?.todos.find((todo) => todo.id === id);
 }
 
 export function useEditTodoText(todoListId: string) {

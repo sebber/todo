@@ -1,3 +1,4 @@
+import { NotFoundError } from "@prisma/client/runtime";
 import { z } from "zod";
 import { router, protectedProcedure } from "../trpc";
 
@@ -39,12 +40,18 @@ export const todoRouter = router({
         data: { text: input.text },
       });
     }),
-  markTodoAsDone: protectedProcedure
-    .input(z.object({ id: z.string(), done: z.boolean() }))
-    .mutation(({ ctx, input }) => {
+  toggle: protectedProcedure
+    .input(z.object({ id: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const todo = await ctx.prisma.todo.findUnique({
+        where: { id: input.id },
+      });
+      if (!todo) {
+        throw new NotFoundError("Did not find todo");
+      }
       return ctx.prisma.todo.update({
         where: { id: input.id },
-        data: { done: input.done },
+        data: { done: !todo.done },
       });
     }),
   clearCompleted: protectedProcedure
