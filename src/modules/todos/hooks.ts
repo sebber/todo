@@ -10,22 +10,25 @@ export function useToggleTodo(todoListId: string) {
       const previousTodoList = utils.todo.getTodoList.getData({
         id: todoListId,
       });
-      const oldTodo = previousTodoList?.todos.find((todo) => todo.id === id);
+      if (previousTodoList) {
+        const oldTodo = previousTodoList?.todos.find((todo) => todo.id === id);
 
-      utils.todo.getTodoList.setData({ id: todoListId }, (oldTodoList) => {
-        const todoIndex = oldTodoList?.todos.findIndex(
-          (todo) => todo.id === oldTodo?.id
-        );
-        if (!todoIndex) return oldTodoList;
-        return Object.assign({}, oldTodoList, {
-          todos: Object.assign([], oldTodoList?.todos, {
-            [todoIndex]: Object.assign({}, oldTodo, { done: !oldTodo?.done }),
-          }),
+        utils.todo.getTodoList.setData({ id: todoListId }, (oldTodoList) => {
+          const todoIndex = oldTodoList?.todos.findIndex(
+            (todo) => todo.id === oldTodo?.id
+          );
+          if (!todoIndex) return oldTodoList;
+          return Object.assign({}, oldTodoList, {
+            todos: Object.assign([], oldTodoList?.todos, {
+              [todoIndex]: Object.assign({}, oldTodo, { done: !oldTodo?.done }),
+            }),
+          });
         });
-      });
+      }
+      return { previousTodoList };
     },
-    onSuccess(data) {
-      utils.todo.getTodoList.invalidate({ id: data.todoListId });
+    onSettled() {
+      utils.todo.getTodoList.invalidate({ id: todoListId });
     },
   });
 }
