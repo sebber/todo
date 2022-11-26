@@ -148,6 +148,21 @@ export function useChangeTodoListTitle() {
 export function useAddTodo(id: string) {
   const utils = trpc.useContext();
   return trpc.todo.addTodo.useMutation({
+    async onMutate() {
+      await utils.todo.getTodoList.cancel({ id });
+      const previousTodoList = utils.todo.getTodoList.getData({ id });
+      if (previousTodoList) {
+        utils.todo.getTodoList.setData({ id }, (old) => {
+          return Object.assign({}, old, {
+            todos: [
+              ...(old?.todos || []),
+              { id: "_optimistic_", text: "", done: false },
+            ],
+          });
+        });
+      }
+      return { previousTodoList };
+    },
     onSuccess() {
       utils.todo.getTodoList.invalidate({ id });
     },
