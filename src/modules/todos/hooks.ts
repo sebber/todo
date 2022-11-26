@@ -173,6 +173,12 @@ export function useDeleteTodoList() {
   const router = useRouter();
   const utils = trpc.useContext();
   return trpc.todo.deleteTodoList.useMutation({
+    async onMutate({ id }) {
+      await utils.todo.getTodoLists.cancel();
+      utils.todo.getTodoLists.setData(undefined, (lists) => {
+        return lists?.filter((list) => list.id !== id);
+      });
+    },
     onSuccess(_data, variables) {
       utils.todo.getTodoList.invalidate({ id: variables.id });
       utils.todo.getTodoLists.invalidate();
