@@ -71,7 +71,13 @@ export const todoRouter = router({
     .query(({ ctx, input }) => {
       return ctx.prisma.todoList.findFirst({
         where: { id: input.id, ownerId: ctx.session.user.id },
-        include: { todos: true },
+      });
+    }),
+  getTodos: protectedProcedure
+    .input(z.object({ id: z.string() }))
+    .query(({ ctx, input }) => {
+      return ctx.prisma.todo.findMany({
+        where: { todoListId: input.id },
       });
     }),
 });

@@ -16,6 +16,7 @@ import {
   useEditTodoText,
   useTodo,
   useTodoList,
+  useTodos,
   useToggleTodo,
 } from "./hooks";
 
@@ -143,11 +144,11 @@ const TodoListHeader = ({ id }: { id: string }) => {
 };
 
 const TodoListBody = ({ id }: { id: string }) => {
-  const { data: todoList } = useTodoList(id);
+  const { data: todos } = useTodos(id);
 
   return (
     <>
-      {todoList?.todos.map((todo) => (
+      {todos?.map((todo) => (
         <Todo key={todo.id} todoListId={id} id={todo.id} />
       ))}
     </>
@@ -175,9 +176,9 @@ export const DeleteTodoListButton = ({ id }: { id: string }) => {
 };
 
 const TodoListFooter = ({ id }: { id: string }) => {
-  const { data: todoList } = useTodoList(id);
-  const itemsLeftToDo = todoList?.todos.filter((t) => !t.done).length;
-  const anyItemsAreDone = todoList?.todos.some((t) => t.done);
+  const { data: todos } = useTodos(id);
+  const itemsLeftToDo = todos?.filter((t) => !t.done).length;
+  const anyItemsAreDone = todos?.some((t) => t.done);
 
   return (
     <div className="flex flex-row items-center justify-between border-b bg-white p-2 py-4">
