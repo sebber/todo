@@ -1,5 +1,23 @@
+import { Todo, TodoList } from "@prisma/client";
 import { useRouter } from "next/router";
 import { trpc } from "../../utils/trpc";
+
+type TodoListWithTodos = TodoList & { todos: Todo[] };
+
+function toggleTodo(todoId: string, list: TodoListWithTodos) {
+  const index = list.todos.findIndex((todo) => todo.id === todoId);
+  if (-1 === index) throw new Error("Couldn't find todo");
+  const todo = list.todos[index];
+  if (!todo) throw new Error("Couldn't find todo");
+
+  return Object.assign(list, {
+    todos: [
+      ...list.todos.slice(0, index),
+      { ...list.todos[index], done: !todo.done },
+      ...list.todos.slice(index + 1),
+    ],
+  });
+}
 
 export function useToggleTodo(todoListId: string) {
   const utils = trpc.useContext();
@@ -11,19 +29,8 @@ export function useToggleTodo(todoListId: string) {
         id: todoListId,
       });
       if (previousTodoList) {
-        const oldTodo = previousTodoList?.todos.find((todo) => todo.id === id);
-
-        utils.todo.getTodoList.setData({ id: todoListId }, (oldTodoList) => {
-          const todoIndex = oldTodoList?.todos.findIndex(
-            (todo) => todo.id === oldTodo?.id
-          );
-          if (!todoIndex) return oldTodoList;
-          return Object.assign({}, oldTodoList, {
-            todos: Object.assign([], oldTodoList?.todos, {
-              [todoIndex]: Object.assign({}, oldTodo, { done: !oldTodo?.done }),
-            }),
-          });
-        });
+        const updatedList = toggleTodo(id, previousTodoList);
+        utils.todo.getTodoList.setData({ id: todoListId }, updatedList);
       }
       return { previousTodoList };
     },
