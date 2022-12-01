@@ -1,22 +1,31 @@
-import { Todo, TodoList } from "@prisma/client";
+import type { Todo } from "@prisma/client";
 import { useRouter } from "next/router";
 import { trpc } from "../../utils/trpc";
 
-type TodoListWithTodos = TodoList & { todos: Todo[] };
-
-function toggleTodo(todoId: string, list: TodoListWithTodos) {
-  const index = list.todos.findIndex((todo) => todo.id === todoId);
+function updateTodo(todoId: string, newData: Partial<Todo>, todos: Todo[]) {
+  const index = todos.findIndex((todo) => todo.id === todoId);
   if (-1 === index) throw new Error("Couldn't find todo");
-  const todo = list.todos[index];
+  const oldTodo = todos[index];
+  if (!oldTodo) throw new Error("Couldn't find todo");
+
+  return [
+    ...todos.slice(0, index),
+    { ...todos[index], ...newData },
+    ...todos.slice(index + 1),
+  ] as Todo[];
+}
+
+function toggleTodo(todoId: string, todos: Todo[]): Todo[] {
+  const index = todos.findIndex((todo) => todo.id === todoId);
+  if (-1 === index) throw new Error("Couldn't find todo");
+  const todo = todos[index];
   if (!todo) throw new Error("Couldn't find todo");
 
-  return Object.assign(list, {
-    todos: [
-      ...list.todos.slice(0, index),
-      { ...list.todos[index], done: !todo.done },
-      ...list.todos.slice(index + 1),
-    ],
-  });
+  return [
+    ...todos.slice(0, index),
+    { ...todos[index], done: !todo.done },
+    ...todos.slice(index + 1),
+  ] as Todo[];
 }
 
 export function useToggleTodo(todoListId: string) {
@@ -24,15 +33,24 @@ export function useToggleTodo(todoListId: string) {
 
   return trpc.todo.toggle.useMutation({
     async onMutate({ id }) {
-      await utils.todo.getTodoList.cancel({ id: todoListId });
-      const previousTodoList = utils.todo.getTodoList.getData({
+      await utils.todo.getTodos.cancel({ id: todoListId });
+      const previousTodos = utils.todo.getTodos.getData({
         id: todoListId,
       });
-      if (previousTodoList) {
-        const updatedList = toggleTodo(id, previousTodoList);
-        utils.todo.getTodoList.setData({ id: todoListId }, updatedList);
+
+      if (previousTodos && previousTodos.length > 0) {
+        utils.todo.getTodos.setData(
+          { id: todoListId },
+          toggleTodo(id, previousTodos)
+        );
       }
-      return { previousTodoList };
+
+      return { previousTodos };
+    },
+    onSuccess(data, _variables) {
+      utils.todo.getTodos.setData({ id: todoListId }, (todos) =>
+        updateTodo(data.id, data, todos || [])
+      );
     },
     onSettled() {
       utils.todo.getTodoList.invalidate({ id: todoListId });
@@ -41,46 +59,48 @@ export function useToggleTodo(todoListId: string) {
 }
 
 export function useTodoList(id: string) {
-  return trpc.todo.getTodoList.useQuery({ id: id });
+  return trpc.todo.getTodoList.useQuery({ id });
 }
 
 export function useTodoLists() {
   return trpc.todo.getTodoLists.useQuery();
 }
 
+export function useTodos(todoListId: string) {
+  return trpc.todo.getTodos.useQuery({ id: todoListId });
+}
+
 export function useTodo(id: string, todoListId: string) {
-  const { data: todoList } = useTodoList(todoListId);
-  return todoList?.todos.find((todo) => todo.id === id);
+  const { data: todos } = useTodos(todoListId);
+  return todos?.find((todo) => todo.id === id);
 }
 
 export function useEditTodoText(todoListId: string) {
   const utils = trpc.useContext();
   return trpc.todo.changeTodoText.useMutation({
     async onMutate(variables) {
-      await utils.todo.getTodoList.cancel({ id: todoListId });
-      const previousTodoList = utils.todo.getTodoList.getData({
+      await utils.todo.getTodos.cancel({ id: todoListId });
+      const previousTodos = utils.todo.getTodos.getData({
         id: todoListId,
       });
-      if (previousTodoList) {
-        const oldTodo = previousTodoList?.todos.find(
-          (todo) => todo.id === variables.id
+      if (previousTodos) {
+        utils.todo.getTodos.setData(
+          { id: todoListId },
+          updateTodo(variables.id, { text: variables.text }, previousTodos)
         );
-        utils.todo.getTodoList.setData({ id: todoListId }, (oldTodoList) => {
-          const todoIndex = oldTodoList?.todos.findIndex(
-            (todo) => todo.id === oldTodo?.id
-          );
-          if (!todoIndex) return oldTodoList;
-          return Object.assign({}, oldTodoList, {
-            todos: Object.assign([], oldTodoList?.todos, {
-              [todoIndex]: Object.assign({}, oldTodo, { text: variables.text }),
-            }),
-          });
-        });
       }
-      return { previousTodoList };
+      return { previousTodos };
+    },
+    onSuccess(data, _variables, context) {
+      if (context?.previousTodos) {
+        utils.todo.getTodos.setData(
+          { id: todoListId },
+          updateTodo(data.id, data, context.previousTodos)
+        );
+      }
     },
     onSettled() {
-      utils.todo.getTodoList.invalidate({ id: todoListId });
+      utils.todo.getTodos.invalidate({ id: todoListId });
     },
   });
 }
@@ -89,19 +109,18 @@ export function useClearCompletedTodos() {
   const utils = trpc.useContext();
   return trpc.todo.clearCompleted.useMutation({
     async onMutate({ id }) {
-      await utils.todo.getTodoList.cancel({ id });
-      const previousTodoList = utils.todo.getTodoList.getData({ id });
+      await utils.todo.getTodos.cancel({ id });
+      const previousTodoList = utils.todo.getTodos.getData({ id });
       if (previousTodoList) {
-        utils.todo.getTodoList.setData({ id }, (old) => {
-          return Object.assign({}, old, {
-            todos: (old?.todos || []).filter((todo) => !todo.done),
-          });
-        });
+        utils.todo.getTodos.setData(
+          { id },
+          previousTodoList.filter((todo) => todo.id !== id)
+        );
       }
       return { previousTodoList };
     },
     onSuccess(_data, variables) {
-      utils.todo.getTodoList.invalidate({ id: variables.id });
+      utils.todo.getTodos.invalidate({ id: variables.id });
     },
   });
 }
@@ -152,26 +171,40 @@ export function useChangeTodoListTitle() {
   });
 }
 
-export function useAddTodo(id: string) {
+export function useAddTodo(todoListId: string) {
   const utils = trpc.useContext();
   return trpc.todo.addTodo.useMutation({
-    async onMutate() {
-      await utils.todo.getTodoList.cancel({ id });
-      const previousTodoList = utils.todo.getTodoList.getData({ id });
-      if (previousTodoList) {
-        utils.todo.getTodoList.setData({ id }, (old) => {
-          return Object.assign({}, old, {
-            todos: [
-              ...(old?.todos || []),
-              { id: "_optimistic_", text: "", done: false },
-            ],
-          });
-        });
+    async onMutate({ text }) {
+      await utils.todo.getTodos.cancel({ id: todoListId });
+      const previousTodos = utils.todo.getTodos.getData({
+        id: todoListId,
+      });
+      if (previousTodos) {
+        utils.todo.getTodos.setData({ id: todoListId }, [
+          ...previousTodos,
+          {
+            todoListId: todoListId,
+            id: "_optimistic_",
+            text,
+            done: false,
+          },
+        ]);
       }
-      return { previousTodoList };
+      return { previousTodos };
     },
-    onSuccess() {
-      utils.todo.getTodoList.invalidate({ id });
+    onSuccess(data) {
+      const optimisticTodoList = utils.todo.getTodos.getData({
+        id: todoListId,
+      });
+      if (optimisticTodoList) {
+        utils.todo.getTodos.setData(
+          { id: todoListId },
+          updateTodo("_optimistic_", data, optimisticTodoList)
+        );
+      }
+    },
+    onSettled() {
+      utils.todo.getTodos.invalidate({ id: todoListId });
     },
   });
 }
