@@ -172,6 +172,20 @@ export function useChangeTodoListTitle() {
 }
 
 export function useAddTodo(id: string) {
+function addNewTodo(text: string, list: TodoListWithTodos) {
+  return {
+    ...list,
+    todos: [
+      ...list.todos,
+      {
+        todoListId: list.id,
+        id: "_optimistic_",
+        text,
+        done: false,
+      },
+    ],
+  };
+}
   const utils = trpc.useContext();
   return trpc.todo.addTodo.useMutation({
     async onMutate() {
