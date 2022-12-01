@@ -60,7 +60,7 @@ export function useToggleTodo(todoListId: string) {
 }
 
 export function useTodoList(id: string) {
-  return trpc.todo.getTodoList.useQuery({ id: id });
+  return trpc.todo.getTodoList.useQuery({ id });
 }
 
 export function useTodoLists() {
