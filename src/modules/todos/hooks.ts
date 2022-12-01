@@ -1,4 +1,4 @@
-import { Todo, TodoList } from "@prisma/client";
+import type { Todo, TodoList } from "@prisma/client";
 import { useRouter } from "next/router";
 import { trpc } from "../../utils/trpc";
 
