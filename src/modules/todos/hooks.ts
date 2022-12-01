@@ -4,6 +4,25 @@ import { trpc } from "../../utils/trpc";
 
 type TodoListWithTodos = TodoList & { todos: Todo[] };
 
+function updateTodo(
+  todoId: string,
+  newData: Partial<Todo>,
+  list: TodoListWithTodos
+) {
+  const index = list.todos.findIndex((todo) => todo.id === todoId);
+  if (-1 === index) throw new Error("Couldn't find todo");
+  const oldTodo = list.todos[index];
+  if (!oldTodo) throw new Error("Couldn't find todo");
+
+  return Object.assign(list, {
+    todos: [
+      ...list.todos.slice(0, index),
+      { ...list.todos[index], ...newData },
+      ...list.todos.slice(index + 1),
+    ],
+  });
+}
+
 function toggleTodo(todoId: string, list: TodoListWithTodos) {
   const index = list.todos.findIndex((todo) => todo.id === todoId);
   if (-1 === index) throw new Error("Couldn't find todo");
