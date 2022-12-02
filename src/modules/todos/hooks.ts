@@ -193,15 +193,9 @@ export function useAddTodo(todoListId: string) {
       return { previousTodos };
     },
     onSuccess(data) {
-      const optimisticTodoList = utils.todo.getTodos.getData({
-        id: todoListId,
-      });
-      if (optimisticTodoList) {
-        utils.todo.getTodos.setData(
-          { id: todoListId },
-          updateTodo("_optimistic_", data, optimisticTodoList)
-        );
-      }
+      utils.todo.getTodos.setData({ id: todoListId }, (todos) =>
+        todos ? updateTodo("_optimistic_", data, todos) : undefined
+      );
     },
     onSettled() {
       utils.todo.getTodos.invalidate({ id: todoListId });
