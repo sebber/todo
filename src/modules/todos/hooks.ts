@@ -110,16 +110,16 @@ export function useClearCompletedTodos() {
   return trpc.todo.clearCompleted.useMutation({
     async onMutate({ id }) {
       await utils.todo.getTodos.cancel({ id });
-      const previousTodoList = utils.todo.getTodos.getData({ id });
-      if (previousTodoList) {
+      const previousTodos = utils.todo.getTodos.getData({ id });
+      if (previousTodos) {
         utils.todo.getTodos.setData(
           { id },
-          previousTodoList.filter((todo) => todo.id !== id)
+          previousTodos.filter((todo) => !todo.done)
         );
       }
-      return { previousTodoList };
+      return { previousTodos };
     },
-    onSuccess(_data, variables) {
+    onSettled(_data, _error, variables) {
       utils.todo.getTodos.invalidate({ id: variables.id });
     },
   });
