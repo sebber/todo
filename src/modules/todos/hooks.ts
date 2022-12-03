@@ -47,7 +47,7 @@ export function useToggleTodo(todoListId: string) {
 
       return { previousTodos };
     },
-    onSuccess(data, _variables) {
+    onSuccess(data) {
       utils.todo.getTodos.setData({ id: todoListId }, (todos) =>
         updateTodo(data.id, data, todos || [])
       );
