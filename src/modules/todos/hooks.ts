@@ -198,7 +198,7 @@ export function useAddTodo(todoListId: string) {
       );
     },
     onSettled() {
-      utils.todo.getTodos.invalidate({ id: todoListId });
+      utils.todo.getTodos.refetch({ id: todoListId });
     },
   });
 }
