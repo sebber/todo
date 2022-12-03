@@ -94,13 +94,10 @@ export function useEditTodoText(todoListId: string) {
       }
       return { previousTodos };
     },
-    onSuccess(data, _variables, context) {
-      if (context?.previousTodos) {
-        utils.todo.getTodos.setData(
-          { id: todoListId },
-          updateTodo(data.id, data, context.previousTodos)
-        );
-      }
+    onSuccess(data) {
+      utils.todo.getTodos.setData({ id: todoListId }, (todos) =>
+        todos ? updateTodo(data.id, data, todos) : todos
+      );
     },
     onSettled() {
       utils.todo.getTodos.invalidate({ id: todoListId });
