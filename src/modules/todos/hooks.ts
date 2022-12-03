@@ -59,7 +59,7 @@ export function useToggleTodo(todoListId: string) {
 }
 
 export function useTodoList(id: string) {
-  return trpc.todo.getTodoList.useQuery({ id });
+  return trpc.todo.getTodoList.useQuery({ id }, { enabled: !!id });
 }
 
 export function useTodoLists() {
@@ -67,7 +67,10 @@ export function useTodoLists() {
 }
 
 export function useTodos(todoListId: string) {
-  return trpc.todo.getTodos.useQuery({ id: todoListId });
+  return trpc.todo.getTodos.useQuery(
+    { id: todoListId },
+    { enabled: !!todoListId }
+  );
 }
 
 export function useTodo(id: string, todoListId: string) {
