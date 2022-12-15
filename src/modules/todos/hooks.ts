@@ -126,19 +126,13 @@ export function useClearCompletedTodos() {
 }
 
 export function useCreateTodoList() {
-  const router = useRouter();
-  return trpc.todo.createTodoList.useMutation({
-    onSuccess(data) {
-      router.push(`/todos/${data.id}`);
-    },
-  });
+  return trpc.todo.createTodoList.useMutation();
 }
 
 export function useChangeTodoListTitle() {
   const utils = trpc.useContext();
   return trpc.todo.changeTitle.useMutation({
-    async onMutate(variables) {
-      const { id, name } = variables;
+    async onMutate({ id, name }) {
       await utils.todo.getTodoList.cancel({ id: id });
       const previousTodoList = utils.todo.getTodoList.getData({ id });
       utils.todo.getTodoList.setData({ id }, (old) => {
@@ -196,7 +190,6 @@ export function useAddTodo(todoListId: string) {
 }
 
 export function useDeleteTodoList() {
-  const router = useRouter();
   const utils = trpc.useContext();
   return trpc.todo.deleteTodoList.useMutation({
     async onMutate({ id }) {
@@ -204,9 +197,6 @@ export function useDeleteTodoList() {
       utils.todo.getTodoLists.setData(undefined, (lists) => {
         return lists?.filter((list) => list.id !== id);
       });
-    },
-    onSuccess(_data, variables) {
-      router.push(`/todos`);
     },
   });
 }

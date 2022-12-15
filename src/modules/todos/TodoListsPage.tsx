@@ -5,6 +5,7 @@ import { FaAngleRight } from "react-icons/fa";
 import { Button } from "../style/buttons/Button";
 import { PageTitle } from "../style/text/PageTitle";
 import { useCreateTodoList, useTodoLists } from "./hooks";
+import { useRouter } from "next/router";
 
 const TodoListDisplay = ({ id }: { id: string }) => {
   const { data: todoLists } = useTodoLists();
@@ -39,10 +40,21 @@ const TodoListsDisplay = () => {
 };
 
 export const CreateTodoLinkButton = () => {
+  const router = useRouter();
   const createTodoList = useCreateTodoList();
 
   return (
-    <Button onClick={() => createTodoList.mutate()}>Make a new list</Button>
+    <Button
+      onClick={() =>
+        createTodoList.mutate(undefined, {
+          onSuccess(data) {
+            router.push(`/todos/${data.id}`);
+          },
+        })
+      }
+    >
+      Make a new list
+    </Button>
   );
 };
 
