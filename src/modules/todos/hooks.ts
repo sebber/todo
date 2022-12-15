@@ -163,11 +163,6 @@ export function useChangeTodoListTitle() {
     onError(_err, { id }, context) {
       utils.todo.getTodoList.setData({ id }, context?.previousTodoList);
     },
-    onSettled(data) {
-      if (data?.id) {
-        utils.todo.getTodoList.invalidate({ id: data.id });
-      }
-    },
   });
 }
 
@@ -197,9 +192,6 @@ export function useAddTodo(todoListId: string) {
         todos ? updateTodo("_optimistic_", data, todos) : undefined
       );
     },
-    onSettled() {
-      utils.todo.getTodos.invalidate({ id: todoListId });
-    },
   });
 }
 
@@ -214,8 +206,6 @@ export function useDeleteTodoList() {
       });
     },
     onSuccess(_data, variables) {
-      utils.todo.getTodoList.invalidate({ id: variables.id });
-      utils.todo.getTodoLists.invalidate();
       router.push(`/todos`);
     },
   });
