@@ -52,6 +52,28 @@ const TodoTextEditForm = ({
   );
 };
 
+const TodoCheckbox = ({
+  id,
+  todoListId,
+  defaultChecked = false,
+}: {
+  id: string;
+  todoListId: string;
+  defaultChecked?: boolean;
+}) => {
+  const toggleTodo = useToggleTodo(todoListId);
+
+  return (
+    <input
+      id={`todo-input-${id}`}
+      type="checkbox"
+      defaultChecked={defaultChecked}
+      className="bg-gray-200 accent-indigo-400"
+      onChange={() => toggleTodo.mutate({ id })}
+    />
+  );
+};
+
 const TodoTextLabel = ({
   children,
   ...props
@@ -68,7 +90,6 @@ const TodoTextLabel = ({
 
 const Todo = ({ id, todoListId }: { id: string; todoListId: string }) => {
   const todo = useTodo(id, todoListId);
-  const toggleTodo = useToggleTodo(todoListId);
   const [isEditing, setIsEditing] = useState(false);
 
   if (!todo) {
@@ -76,16 +97,14 @@ const Todo = ({ id, todoListId }: { id: string; todoListId: string }) => {
   }
 
   return (
-    <div
-      className="flex flex-row items-center border-b bg-white p-2 py-4"
-      onClick={() => toggleTodo.mutate({ id: todo.id })}
-    >
-      <input
-        id={`todo-input-${todo.id}`}
-        type="checkbox"
-        checked={todo.done}
-        className="hidden"
-      />
+    <div className="flex flex-row items-center border-b bg-white p-2 py-4">
+      <div className="border-gray-500 px-4">
+        <TodoCheckbox
+          id={id}
+          todoListId={todoListId}
+          defaultChecked={todo.done}
+        />
+      </div>
       {isEditing ? (
         <TodoTextEditForm
           onComplete={() => setIsEditing(false)}
