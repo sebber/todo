@@ -126,19 +126,13 @@ export function useClearCompletedTodos() {
 }
 
 export function useCreateTodoList() {
-  const router = useRouter();
-  return trpc.todo.createTodoList.useMutation({
-    onSuccess(data) {
-      router.push(`/todos/${data.id}`);
-    },
-  });
+  return trpc.todo.createTodoList.useMutation();
 }
 
 export function useChangeTodoListTitle() {
   const utils = trpc.useContext();
   return trpc.todo.changeTitle.useMutation({
-    async onMutate(variables) {
-      const { id, name } = variables;
+    async onMutate({ id, name }) {
       await utils.todo.getTodoList.cancel({ id: id });
       const previousTodoList = utils.todo.getTodoList.getData({ id });
       utils.todo.getTodoList.setData({ id }, (old) => {
@@ -162,11 +156,6 @@ export function useChangeTodoListTitle() {
     },
     onError(_err, { id }, context) {
       utils.todo.getTodoList.setData({ id }, context?.previousTodoList);
-    },
-    onSettled(data) {
-      if (data?.id) {
-        utils.todo.getTodoList.invalidate({ id: data.id });
-      }
     },
   });
 }
@@ -197,14 +186,10 @@ export function useAddTodo(todoListId: string) {
         todos ? updateTodo("_optimistic_", data, todos) : undefined
       );
     },
-    onSettled() {
-      utils.todo.getTodos.invalidate({ id: todoListId });
-    },
   });
 }
 
 export function useDeleteTodoList() {
-  const router = useRouter();
   const utils = trpc.useContext();
   return trpc.todo.deleteTodoList.useMutation({
     async onMutate({ id }) {
@@ -212,11 +197,6 @@ export function useDeleteTodoList() {
       utils.todo.getTodoLists.setData(undefined, (lists) => {
         return lists?.filter((list) => list.id !== id);
       });
-    },
-    onSuccess(_data, variables) {
-      utils.todo.getTodoList.invalidate({ id: variables.id });
-      utils.todo.getTodoLists.invalidate();
-      router.push(`/todos`);
     },
   });
 }
