@@ -52,6 +52,28 @@ const TodoTextEditForm = ({
   );
 };
 
+const TodoCheckbox = ({
+  id,
+  todoListId,
+  defaultChecked = false,
+}: {
+  id: string;
+  todoListId: string;
+  defaultChecked?: boolean;
+}) => {
+  const toggleTodo = useToggleTodo(todoListId);
+
+  return (
+    <input
+      id={`todo-input-${id}`}
+      type="checkbox"
+      defaultChecked={defaultChecked}
+      className="bg-gray-200 accent-indigo-400"
+      onChange={() => toggleTodo.mutate({ id })}
+    />
+  );
+};
+
 const TodoTextLabel = ({
   children,
   ...props
