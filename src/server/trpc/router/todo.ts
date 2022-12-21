@@ -3,6 +3,12 @@ import { z } from "zod";
 import { router, protectedProcedure } from "../trpc";
 
 export const todoRouter = router({
+  getTodoLists: protectedProcedure.query(({ ctx }) => {
+    return ctx.prisma.todoList.findMany({
+      where: { ownerId: ctx.session.user.id },
+      include: { todos: true },
+    });
+  }),
   createTodoList: protectedProcedure.mutation(({ ctx }) => {
     return ctx.prisma.todoList.create({
       data: {
@@ -59,25 +65,6 @@ export const todoRouter = router({
     .mutation(({ ctx, input }) => {
       return ctx.prisma.todo.deleteMany({
         where: { todoListId: input.id, done: true },
-      });
-    }),
-  getTodoLists: protectedProcedure.query(({ ctx }) => {
-    return ctx.prisma.todoList.findMany({
-      where: { ownerId: ctx.session.user.id },
-    });
-  }),
-  getTodoList: protectedProcedure
-    .input(z.object({ id: z.string() }))
-    .query(({ ctx, input }) => {
-      return ctx.prisma.todoList.findFirst({
-        where: { id: input.id, ownerId: ctx.session.user.id },
-      });
-    }),
-  getTodos: protectedProcedure
-    .input(z.object({ id: z.string() }))
-    .query(({ ctx, input }) => {
-      return ctx.prisma.todo.findMany({
-        where: { todoListId: input.id },
       });
     }),
 });
