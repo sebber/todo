@@ -4,7 +4,7 @@ import { MainLayout } from "../layouts/MainLayout";
 import { FaAngleRight } from "react-icons/fa";
 import { Button } from "../style/buttons/Button";
 import { PageTitle } from "../style/text/PageTitle";
-import { useCreateTodoList, useTodoLists } from "./hooks";
+import { useCreateTodoList, useTodoLists } from "./queries";
 import { useRouter } from "next/router";
 
 const TodoListDisplay = ({ id }: { id: string }) => {

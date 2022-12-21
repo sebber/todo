@@ -18,7 +18,7 @@ import {
   useTodoList,
   useTodos,
   useToggleTodo,
-} from "./hooks";
+} from "./queries";
 
 const TodoTextEditForm = ({
   id,
@@ -89,7 +89,7 @@ const TodoTextLabel = ({
 };
 
 const Todo = ({ id, todoListId }: { id: string; todoListId: string }) => {
-  const todo = useTodo(id, todoListId);
+  const { data: todo } = useTodo(id, todoListId);
   const [isEditing, setIsEditing] = useState(false);
 
   if (!todo) {
