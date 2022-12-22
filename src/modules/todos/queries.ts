@@ -111,6 +111,30 @@ export function useAddTodo(todoListId: string) {
   });
 }
 
+export function useClearCompletedTodos() {
+  const utils = trpc.useContext();
+  return trpc.todo.clearCompleted.useMutation({
+    async onMutate(variables) {
+      await utils.todo.getTodoLists.cancel();
+      const previousData = utils.todo.getTodoLists.getData();
+
+      utils.todo.getTodoLists.setData(undefined, (todoLists = []) => {
+        return updateTodoList(todoLists, variables.id, (list) => ({
+          ...list,
+          todos: list.todos.filter((todo) => !todo.done),
+        }));
+      });
+
+      return { previousData };
+    },
+    onError(_err, _var, context) {
+      if (context?.previousData) {
+        utils.todo.getTodoLists.setData(undefined, context.previousData);
+      }
+    },
+  });
+}
+
 type TodoUpdateAction = (todo: Todo) => Todo;
 
 function updateTodo(todos: Todo[], todoId: string, update: TodoUpdateAction) {
@@ -175,8 +199,4 @@ export function useEditTodoText(todoListId: string) {
       }
     },
   });
-}
-
-export function useClearCompletedTodos() {
-  return trpc.todo.clearCompleted.useMutation();
 }
