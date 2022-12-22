@@ -189,16 +189,10 @@ export const DeleteTodoListButton = ({ id }: { id: string }) => {
   const router = useRouter();
   return (
     <AngryButton
-      onClick={() =>
-        deleteTodoList.mutate(
-          { id: id },
-          {
-            onSuccess() {
-              router.push(`/todos`);
-            },
-          }
-        )
-      }
+      onClick={() => {
+        deleteTodoList.mutate({ id: id });
+        router.push(`/todos`);
+      }}
     >
       Delete List
     </AngryButton>
