@@ -1,4 +1,5 @@
 import { trpc } from "../../utils/trpc";
+import { Todo, type TodoList } from "@prisma/client";
 
 export function useTodoList(id: string) {
   return trpc.todo.getTodoLists.useQuery(undefined, {
@@ -45,8 +46,57 @@ export function useChangeTodoListTitle() {
   return trpc.todo.changeTitle.useMutation();
 }
 
+type TodoListWithTodos = TodoList & { todos: Todo[] };
+type TodoListUpdateAction = (todoList: TodoListWithTodos) => TodoListWithTodos;
+
+function updateTodoList(
+  todoLists: TodoListWithTodos[],
+  todoListId: string,
+  update: TodoListUpdateAction
+) {
+  if (todoLists?.length <= 0) return todoLists;
+  const index = todoLists?.findIndex((list) => list.id === todoListId);
+  if (index === -1) return todoLists;
+  const todoList = todoLists[index];
+  if (!todoList) return todoLists;
+
+  return [
+    ...todoLists.slice(0, index),
+    update(todoList),
+    ...todoLists.slice(index + 1),
+  ];
+}
+
 export function useAddTodo(todoListId: string) {
-  return trpc.todo.addTodo.useMutation();
+  const utils = trpc.useContext();
+  return trpc.todo.addTodo.useMutation({
+    async onMutate(variables) {
+      await utils.todo.getTodoLists.cancel();
+      const previousData = utils.todo.getTodoLists.getData();
+
+      utils.todo.getTodoLists.setData(undefined, (todoLists = []) => {
+        return updateTodoList(todoLists, todoListId, (list) => ({
+          ...list,
+          todos: [
+            ...list.todos,
+            {
+              todoListId,
+              id: "_optimistic_id",
+              text: variables.text,
+              done: false,
+            },
+          ],
+        }));
+      });
+
+      return { previousData };
+    },
+    onError(_err, _var, context) {
+      if (context?.previousData) {
+        utils.todo.getTodoLists.setData(undefined, context.previousData);
+      }
+    },
+  });
 }
 
 export function useDeleteTodoList() {
