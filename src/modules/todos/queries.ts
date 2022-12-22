@@ -1,14 +1,14 @@
 import { trpc } from "../../utils/trpc";
-import { Todo, type TodoList } from "@prisma/client";
+import type { Todo, TodoList } from "@prisma/client";
+
+export function useTodoLists() {
+  return trpc.todo.getTodoLists.useQuery();
+}
 
 export function useTodoList(id: string) {
   return trpc.todo.getTodoLists.useQuery(undefined, {
     select: (lists) => lists.find((l) => l.id === id),
   });
-}
-
-export function useTodoLists() {
-  return trpc.todo.getTodoLists.useQuery();
 }
 
 export function useTodos(todoListId: string) {
@@ -52,7 +52,24 @@ export function useCreateTodoList() {
 }
 
 export function useDeleteTodoList() {
-  return trpc.todo.deleteTodoList.useMutation();
+  const utils = trpc.useContext();
+  return trpc.todo.deleteTodoList.useMutation({
+    async onMutate(variables) {
+      await utils.todo.getTodoLists.cancel();
+      const previousData = utils.todo.getTodoLists.getData();
+
+      utils.todo.getTodoLists.setData(undefined, (todoLists = []) => {
+        return todoLists.filter((list) => list.id !== variables.id);
+      });
+
+      return { previousData };
+    },
+    onError(_err, _var, context) {
+      if (context?.previousData) {
+        utils.todo.getTodoLists.setData(undefined, context.previousData);
+      }
+    },
+  });
 }
 
 export function useChangeTodoListTitle() {
