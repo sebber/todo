@@ -1,7 +1,7 @@
 import { type Todo, type TodoList } from "@prisma/client";
 import { type NextPage } from "next";
 import { useRouter } from "next/router";
-import { useRef, useState, type HTMLAttributes } from "react";
+import { useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { FaAngleDown } from "react-icons/fa";
 import { MainLayout } from "../layouts/MainLayout";
@@ -13,44 +13,12 @@ import {
   useChangeTodoListTitle,
   useClearCompletedTodos,
   useDeleteTodoList,
-  useEditTodoText,
   useTodo,
   useTodoList,
   useTodos,
   useToggleTodo,
 } from "./queries";
-
-const TodoTextEditForm = ({
-  id,
-  todoListId,
-  defaultText,
-  onComplete,
-}: {
-  id: string;
-  todoListId: string;
-  defaultText: string;
-  onComplete: () => void;
-}) => {
-  const editTodoText = useEditTodoText(todoListId);
-  const { register, handleSubmit } = useForm<Pick<Todo, "text">>({
-    defaultValues: { text: defaultText },
-  });
-  const onSubmit = (data: Pick<Todo, "text">) => {
-    editTodoText.mutate({ id, text: data.text });
-    onComplete();
-  };
-
-  return (
-    <form onSubmit={handleSubmit(onSubmit)}>
-      <input
-        className="nice-font-family pl-12 text-xl font-extralight text-gray-500"
-        type="text"
-        autoFocus
-        {...register("text", { onBlur: onComplete })}
-      />
-    </form>
-  );
-};
+import TodoItemText from "./TodoItemText";
 
 const TodoCheckbox = ({
   id,
@@ -74,23 +42,8 @@ const TodoCheckbox = ({
   );
 };
 
-const TodoTextLabel = ({
-  children,
-  ...props
-}: { children: string } & HTMLAttributes<HTMLLabelElement>) => {
-  return (
-    <label
-      {...props}
-      className="nice-font-family pl-12 text-xl font-extralight text-gray-500"
-    >
-      {children}
-    </label>
-  );
-};
-
 const Todo = ({ id, todoListId }: { id: string; todoListId: string }) => {
   const { data: todo } = useTodo(id, todoListId);
-  const [isEditing, setIsEditing] = useState(false);
 
   if (!todo) {
     return null;
@@ -105,18 +58,7 @@ const Todo = ({ id, todoListId }: { id: string; todoListId: string }) => {
           defaultChecked={todo.done}
         />
       </div>
-      {isEditing ? (
-        <TodoTextEditForm
-          onComplete={() => setIsEditing(false)}
-          id={id}
-          todoListId={todoListId}
-          defaultText={todo.text}
-        />
-      ) : (
-        <TodoTextLabel onDoubleClick={() => setIsEditing(true)}>
-          {todo.text}
-        </TodoTextLabel>
-      )}
+      <TodoItemText id={id} todoListId={todoListId} />
     </div>
   );
 };
@@ -256,7 +198,7 @@ const PageTitleEditForm = ({
   });
   const nameInputRef = useRef<HTMLInputElement | null>(null);
   const onSubmit = async (data: Pick<TodoList, "name">) => {
-    await changeTitle.mutateAsync({ id, name: data.name });
+    changeTitle.mutate({ id, name: data.name });
     onComplete();
   };
   const { ref, ...field } = register("name", { onBlur: onComplete });
