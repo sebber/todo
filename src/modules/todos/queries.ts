@@ -151,7 +151,30 @@ export function useToggleTodo(todoListId: string) {
 }
 
 export function useEditTodoText(todoListId: string) {
-  return trpc.todo.changeTodoText.useMutation();
+  const utils = trpc.useContext();
+  return trpc.todo.changeTodoText.useMutation({
+    async onMutate(variables) {
+      await utils.todo.getTodoLists.cancel();
+      const previousData = utils.todo.getTodoLists.getData();
+
+      utils.todo.getTodoLists.setData(undefined, (todoLists = []) => {
+        return updateTodoList(todoLists, todoListId, (list) => ({
+          ...list,
+          todos: updateTodo(list.todos, variables.id, (todo) => ({
+            ...todo,
+            text: variables.text,
+          })),
+        }));
+      });
+
+      return { previousData };
+    },
+    onError(_err, _var, context) {
+      if (context?.previousData) {
+        utils.todo.getTodoLists.setData(undefined, context.previousData);
+      }
+    },
+  });
 }
 
 export function useClearCompletedTodos() {
