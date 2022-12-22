@@ -16,31 +16,9 @@ import {
   useTodo,
   useTodoList,
   useTodos,
-  useToggleTodo,
 } from "./queries";
+import { TodoCheckbox } from "./TodoCheckbox";
 import TodoItemText from "./TodoItemText";
-
-const TodoCheckbox = ({
-  id,
-  todoListId,
-  defaultChecked = false,
-}: {
-  id: string;
-  todoListId: string;
-  defaultChecked?: boolean;
-}) => {
-  const toggleTodo = useToggleTodo(todoListId);
-
-  return (
-    <input
-      id={`todo-input-${id}`}
-      type="checkbox"
-      defaultChecked={defaultChecked}
-      className="bg-gray-200 accent-indigo-400"
-      onChange={() => toggleTodo.mutate({ id })}
-    />
-  );
-};
 
 const Todo = ({ id, todoListId }: { id: string; todoListId: string }) => {
   const { data: todo } = useTodo(id, todoListId);
@@ -52,11 +30,7 @@ const Todo = ({ id, todoListId }: { id: string; todoListId: string }) => {
   return (
     <div className="flex flex-row items-center border-b bg-white p-2 py-4">
       <div className="border-gray-500 px-4">
-        <TodoCheckbox
-          id={id}
-          todoListId={todoListId}
-          defaultChecked={todo.done}
-        />
+        <TodoCheckbox id={id} todoListId={todoListId} />
       </div>
       <TodoItemText id={id} todoListId={todoListId} />
     </div>
