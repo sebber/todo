@@ -188,6 +188,16 @@ export function useToggleTodo(todoListId: string) {
         utils.todo.getTodoLists.setData(undefined, context.previousData);
       }
     },
+    onSuccess(data, variables) {
+      utils.todo.getTodoLists.setData(undefined, (todoLists = []) => {
+        return updateTodoList(todoLists, todoListId, (list) => ({
+          ...list,
+          todos: updateTodo(list.todos, variables.id, (_todo) => ({
+            ...data,
+          })),
+        }));
+      });
+    },
   });
 }
 
