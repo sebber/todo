@@ -38,26 +38,28 @@ export const todoRouter = router({
         data: { todoListId: input.todoListId, text: input.text },
       });
     }),
+  editTodo: protectedProcedure
+    .input(
+      z.object({
+        id: z.string(),
+        data: z.object({
+          text: z.string().optional(),
+          done: z.boolean().optional(),
+        }),
+      })
+    )
+    .mutation(({ ctx, input }) => {
+      return ctx.prisma.todo.update({
+        where: { id: input.id },
+        data: input.data,
+      });
+    }),
   changeTodoText: protectedProcedure
     .input(z.object({ id: z.string(), text: z.string() }))
     .mutation(({ ctx, input }) => {
       return ctx.prisma.todo.update({
         where: { id: input.id },
         data: { text: input.text },
-      });
-    }),
-  toggle: protectedProcedure
-    .input(z.object({ id: z.string() }))
-    .mutation(async ({ ctx, input }) => {
-      const todo = await ctx.prisma.todo.findUnique({
-        where: { id: input.id },
-      });
-      if (!todo) {
-        throw new NotFoundError("Did not find todo");
-      }
-      return ctx.prisma.todo.update({
-        where: { id: input.id },
-        data: { done: !todo.done },
       });
     }),
   clearCompleted: protectedProcedure

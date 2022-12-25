@@ -1,4 +1,5 @@
-import { useTodo, useToggleTodo } from "./queries";
+import { useCallback, useState } from "react";
+import { useTodo, useToggleTodo, useEditTodo } from "./queries";
 
 export const TodoCheckbox = ({
   id,
@@ -8,15 +9,26 @@ export const TodoCheckbox = ({
   todoListId: string;
 }) => {
   const { data: todo } = useTodo(id, todoListId);
-  const toggleTodo = useToggleTodo(todoListId);
+  const editTodo = useEditTodo();
+  const [done, setDone] = useState<boolean>(todo?.done || false);
+
+  useCallback(() => {
+    if (todo !== undefined) {
+      setDone(todo?.done);
+    }
+  }, [todo?.done]);
 
   return (
     <input
       id={`todo-input-${id}`}
       type="checkbox"
-      checked={todo?.done}
+      checked={done}
       className="bg-gray-200 accent-indigo-400"
-      onChange={() => toggleTodo.mutate({ id })}
+      onChange={(e) => {
+        const checked = e.currentTarget.checked;
+        setDone(checked);
+        editTodo.mutate({ id, data: { done: checked } });
+      }}
     />
   );
 };
