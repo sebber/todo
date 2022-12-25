@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useEffect, useState } from "react";
 import { useTodo, useEditTodo } from "./queries";
 
 export const TodoCheckbox = ({
@@ -12,10 +12,8 @@ export const TodoCheckbox = ({
   const editTodo = useEditTodo(todoListId);
   const [done, setDone] = useState<boolean>(todo?.done || false);
 
-  useCallback(() => {
-    if (todo !== undefined) {
-      setDone(todo?.done);
-    }
+  useEffect(() => {
+    setDone(todo?.done ?? false);
   }, [todo?.done]);
 
   return (
