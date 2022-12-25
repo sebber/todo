@@ -9,7 +9,7 @@ export const TodoCheckbox = ({
   todoListId: string;
 }) => {
   const { data: todo } = useTodo(id, todoListId);
-  const editTodo = useEditTodo();
+  const editTodo = useEditTodo(todoListId);
   const [done, setDone] = useState<boolean>(todo?.done || false);
 
   useCallback(() => {

@@ -191,7 +191,29 @@ export function useEditTodoText(todoListId: string) {
   });
 }
 
-export function useEditTodo() {
-  // const utils = trpc.useContext();
-  return trpc.todo.editTodo.useMutation();
+export function useEditTodo(todoListId: string) {
+  const utils = trpc.useContext();
+  return trpc.todo.editTodo.useMutation({
+    async onMutate(variables) {
+      await utils.todo.getTodoLists.cancel();
+      const previousData = utils.todo.getTodoLists.getData();
+
+      utils.todo.getTodoLists.setData(undefined, (todoLists = []) => {
+        return updateTodoList(todoLists, todoListId, (list) => ({
+          ...list,
+          todos: updateTodo(list.todos, variables.id, (todo) => ({
+            ...todo,
+            ...variables.data,
+          })),
+        }));
+      });
+
+      return { previousData };
+    },
+    onError(_err, _var, context) {
+      if (context?.previousData) {
+        utils.todo.getTodoLists.setData(undefined, context.previousData);
+      }
+    },
+  });
 }
