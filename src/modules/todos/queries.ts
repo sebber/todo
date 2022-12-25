@@ -215,5 +215,15 @@ export function useEditTodo(todoListId: string) {
         utils.todo.getTodoLists.setData(undefined, context.previousData);
       }
     },
+    onSettled(data, _error, variables, _context) {
+      utils.todo.getTodoLists.setData(undefined, (todoLists = []) => {
+        return updateTodoList(todoLists, todoListId, (list) => ({
+          ...list,
+          todos: updateTodo(list.todos, variables.id, (todo) => ({
+            ...data,
+          })),
+        }));
+      });
+    },
   });
 }
