@@ -1,7 +1,7 @@
 import { type Todo, type TodoList } from "@prisma/client";
 import { type NextPage } from "next";
 import { useRouter } from "next/router";
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { FaAngleDown } from "react-icons/fa";
 import { MainLayout } from "../layouts/MainLayout";
@@ -117,8 +117,11 @@ export const DeleteTodoListButton = ({ id }: { id: string }) => {
 
 const TodoListFooter = ({ id }: { id: string }) => {
   const { data: todos } = useTodos(id);
-  const itemsLeftToDo = todos?.filter((t) => !t.done).length;
-  const anyItemsAreDone = todos?.some((t) => t.done);
+  const itemsLeftToDo = useMemo(
+    () => todos?.filter((t) => !t.done).length,
+    [todos]
+  );
+  const anyItemsAreDone = useMemo(() => todos?.some((t) => t.done), [todos]);
 
   return (
     <div className="flex flex-row items-center justify-between border-b bg-white p-2 py-4">
