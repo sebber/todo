@@ -1,6 +1,6 @@
 import type { Todo } from "@prisma/client";
 import { useForm } from "react-hook-form";
-import { useEditTodoText, useTodo } from "./queries";
+import { useTodo, useEditTodo } from "./queries";
 
 export default function TodoItemText({
   id,
@@ -10,13 +10,13 @@ export default function TodoItemText({
   todoListId: string;
 }) {
   const { data: todo } = useTodo(id, todoListId);
-  const editTodoText = useEditTodoText(todoListId);
+  const editTodoText = useEditTodo(todoListId);
   const { register, handleSubmit } = useForm<Pick<Todo, "text">>({
-    defaultValues: { text: todo?.text ?? "What to dooo" },
+    defaultValues: { text: todo?.text },
   });
   const textInput = register("text");
   const onSubmit = (data: Pick<Todo, "text">) => {
-    editTodoText.mutate({ id, text: data.text });
+    editTodoText.mutate({ id, data: { text: data.text } });
     if (document.activeElement instanceof HTMLElement) {
       document.activeElement?.blur();
     }
