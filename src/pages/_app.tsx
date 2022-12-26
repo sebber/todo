@@ -1,10 +1,10 @@
 import { type AppType } from "next/app";
 import { type Session } from "next-auth";
 import { SessionProvider } from "next-auth/react";
-
 import { trpc } from "../utils/trpc";
 
 import "../styles/globals.css";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 
 const MyApp: AppType<{ session: Session | null }> = ({
   Component,
@@ -13,6 +13,7 @@ const MyApp: AppType<{ session: Session | null }> = ({
   return (
     <SessionProvider session={session}>
       <Component {...pageProps} />
+      <ReactQueryDevtools />
     </SessionProvider>
   );
 };
