@@ -97,7 +97,7 @@ export function useAddTodo(todoListId: string) {
   const utils = trpc.useContext();
   return trpc.todo.addTodo.useMutation({
     async onMutate(variables) {
-      await utils.todo.getTodos.cancel();
+      await utils.todo.getTodos.cancel({ todoListId });
       const previousData = utils.todo.getTodos.getData();
 
       utils.todo.getTodos.setData({ todoListId }, (todos = []) => {
