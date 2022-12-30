@@ -105,7 +105,7 @@ export function useAddTodo(todoListId: string) {
           ...todos,
           {
             todoListId,
-            id: "_optimistic_id",
+            id: `_optimistic_${Math.random}`,
             text: variables.text,
             done: false,
           },

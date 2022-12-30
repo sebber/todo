@@ -20,19 +20,21 @@ import {
 import { TodoCheckbox } from "./TodoCheckbox";
 import TodoItemText from "./TodoItemText";
 
-const Todo = ({ id, todoListId }: { id: string; todoListId: string }) => {
-  const { data: todo } = useTodo(id, todoListId);
-
-  if (!todo) {
-    return null;
-  }
-
+const Todo = ({
+  id,
+  todoListId,
+  todo,
+}: {
+  id: string;
+  todoListId: string;
+  todo: Todo;
+}) => {
   return (
     <div className="flex flex-row items-center border-b bg-white p-2 py-4">
       <div className="border-gray-500 px-4">
-        <TodoCheckbox id={id} todoListId={todoListId} />
+        <TodoCheckbox id={id} todoListId={todoListId} checked={todo.done} />
       </div>
-      <TodoItemText id={id} todoListId={todoListId} />
+      <TodoItemText id={id} todoListId={todoListId} text={todo.text} />
     </div>
   );
 };
@@ -84,7 +86,7 @@ const TodoListBody = ({ id }: { id: string }) => {
   return (
     <>
       {todos?.map((todo) => (
-        <Todo key={todo.id} todoListId={id} id={todo.id} />
+        <Todo key={todo.id} todoListId={id} id={todo.id} todo={todo} />
       ))}
     </>
   );

@@ -5,14 +5,15 @@ import { useTodo, useEditTodo } from "./queries";
 export default function TodoItemText({
   id,
   todoListId,
+  text,
 }: {
   id: string;
   todoListId: string;
+  text: string;
 }) {
-  const { data: todo } = useTodo(id, todoListId);
   const editTodoText = useEditTodo(todoListId);
   const { register, handleSubmit } = useForm<Pick<Todo, "text">>({
-    defaultValues: { text: todo?.text },
+    defaultValues: { text: text },
   });
   const textInput = register("text");
   const onSubmit = (data: Pick<Todo, "text">) => {

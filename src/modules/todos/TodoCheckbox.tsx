@@ -4,17 +4,18 @@ import { useTodo, useEditTodo } from "./queries";
 export const TodoCheckbox = ({
   id,
   todoListId,
+  checked,
 }: {
   id: string;
   todoListId: string;
+  checked: boolean;
 }) => {
-  const { data: todo } = useTodo(id, todoListId);
   const editTodo = useEditTodo(todoListId);
-  const [done, setDone] = useState<boolean>(todo?.done || false);
+  const [done, setDone] = useState<boolean>(checked);
 
   useEffect(() => {
-    setDone(todo?.done ?? false);
-  }, [todo?.done]);
+    setDone(checked);
+  }, [checked]);
 
   return (
     <input
