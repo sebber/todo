@@ -39,11 +39,13 @@ const Todo = ({
 };
 
 const TodoListDisplay = ({ id }: { id: string }) => {
+  const { data: todos = [] } = useTodos(id);
+
   return (
     <>
       <TodoListHeader id={id} />
-      <TodoListBody id={id} />
-      <TodoListFooter id={id} />
+      <TodoListBody id={id} todos={todos} />
+      <TodoListFooter id={id} todos={todos} />
     </>
   );
 };
@@ -79,9 +81,7 @@ const TodoListHeader = ({ id }: { id: string }) => {
   );
 };
 
-const TodoListBody = ({ id }: { id: string }) => {
-  const { data: todos } = useTodos(id);
-
+const TodoListBody = ({ id, todos }: { id: string; todos: Todo[] }) => {
   return (
     <>
       {todos?.map((todo) => (
@@ -116,8 +116,7 @@ export const DeleteTodoListButton = ({ id }: { id: string }) => {
   );
 };
 
-const TodoListFooter = ({ id }: { id: string }) => {
-  const { data: todos } = useTodos(id);
+const TodoListFooter = ({ id, todos }: { id: string; todos: Todo[] }) => {
   const itemsLeftToDo = useMemo(
     () => todos?.filter((t) => !t.done).length,
     [todos]
