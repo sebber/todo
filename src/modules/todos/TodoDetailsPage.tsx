@@ -1,8 +1,9 @@
-import { type Todo, type TodoList } from "@prisma/client";
-import { type NextPage } from "next";
-import { useRouter } from "next/router";
 import { useCallback, useMemo, useRef, useState } from "react";
+import { type NextPage } from "next";
+import { type Todo, type TodoList } from "@prisma/client";
+import { useRouter } from "next/router";
 import { useForm } from "react-hook-form";
+import { Field, OneForm } from "@oneform/react";
 import { MainLayout } from "../layouts/MainLayout";
 import { PageTitle } from "../style/text/PageTitle";
 import {
@@ -13,7 +14,6 @@ import {
 } from "./queries";
 import { TodoCheckbox } from "./TodoCheckbox";
 import { TodoItemText } from "./TodoItemText";
-import { Field, OneForm } from "@oneform/react";
 import { ClearCompletedTodosButton } from "./ClearCompletedTodosButton";
 import { DeleteTodoListButton } from "./DeleteTodoListButton";
 import { TitleInput } from "./TitleInput";
