@@ -12,25 +12,22 @@ export function useTodoList(id: string) {
 }
 
 export function useTodos(todoListId: string) {
-  return trpc.todo.getTodoLists.useQuery(undefined, {
-    select: (lists) => lists.find((l) => l.id === todoListId)?.todos,
-  });
+  return trpc.todo.getTodos.useQuery({ todoListId });
 }
 
 export function useTodo(id: string, todoListId: string) {
-  return trpc.todo.getTodoLists.useQuery(undefined, {
-    select: (lists) =>
-      lists
-        .find((l) => l.id === todoListId)
-        ?.todos?.find((todo) => todo.id === id),
-  });
+  return trpc.todo.getTodos.useQuery(
+    { todoListId },
+    {
+      select: (todos) => todos?.find((todo) => todo.id === id),
+    }
+  );
 }
 
-type TodoListWithTodos = TodoList & { todos: Todo[] };
-type TodoListUpdateAction = (todoList: TodoListWithTodos) => TodoListWithTodos;
+type TodoListUpdateAction = (todoList: TodoList) => TodoList;
 
 function updateTodoList(
-  todoLists: TodoListWithTodos[],
+  todoLists: TodoList[],
   todoListId: string,
   update: TodoListUpdateAction
 ) {
@@ -100,39 +97,33 @@ export function useAddTodo(todoListId: string) {
   const utils = trpc.useContext();
   return trpc.todo.addTodo.useMutation({
     async onMutate(variables) {
-      await utils.todo.getTodoLists.cancel();
-      const previousData = utils.todo.getTodoLists.getData();
+      await utils.todo.getTodos.cancel();
+      const previousData = utils.todo.getTodos.getData();
 
-      utils.todo.getTodoLists.setData(undefined, (todoLists = []) => {
-        return updateTodoList(todoLists, todoListId, (list) => ({
-          ...list,
-          todos: [
-            ...list.todos,
-            {
-              todoListId,
-              id: "_optimistic_id",
-              text: variables.text,
-              done: false,
-            },
-          ],
-        }));
+      utils.todo.getTodos.setData({ todoListId }, (todos = []) => {
+        return [
+          ...todos,
+          {
+            todoListId,
+            id: "_optimistic_id",
+            text: variables.text,
+            done: false,
+          },
+        ];
       });
 
       return { previousData };
     },
     onError(_err, _var, context) {
       if (context?.previousData) {
-        utils.todo.getTodoLists.setData(undefined, context.previousData);
+        utils.todo.getTodos.setData({ todoListId }, context.previousData);
       }
     },
     onSuccess(data, variables, context) {
-      utils.todo.getTodoLists.setData(undefined, (todoLists = []) => {
-        return updateTodoList(todoLists, todoListId, (list) => ({
-          ...list,
-          todos: updateTodo(list.todos, "_optimistic_id", (todo) => ({
-            ...todo,
-            ...data,
-          })),
+      utils.todo.getTodos.setData({ todoListId }, (todos = []) => {
+        return updateTodo(todos, "_optimistic_id", (todo) => ({
+          ...todo,
+          ...data,
         }));
       });
     },
@@ -143,21 +134,24 @@ export function useClearCompletedTodos() {
   const utils = trpc.useContext();
   return trpc.todo.clearCompleted.useMutation({
     async onMutate(variables) {
-      await utils.todo.getTodoLists.cancel();
-      const previousData = utils.todo.getTodoLists.getData();
+      await utils.todo.getTodos.cancel();
+      const previousData = utils.todo.getTodos.getData();
 
-      utils.todo.getTodoLists.setData(undefined, (todoLists = []) => {
-        return updateTodoList(todoLists, variables.id, (list) => ({
-          ...list,
-          todos: list.todos.filter((todo) => !todo.done),
-        }));
-      });
+      utils.todo.getTodos.setData(
+        { todoListId: variables.id },
+        (todos = []) => {
+          return todos.filter((todo) => !todo.done);
+        }
+      );
 
       return { previousData };
     },
-    onError(_err, _var, context) {
+    onError(_err, variables, context) {
       if (context?.previousData) {
-        utils.todo.getTodoLists.setData(undefined, context.previousData);
+        utils.todo.getTodos.setData(
+          { todoListId: variables.id },
+          context.previousData
+        );
       }
     },
   });
@@ -179,16 +173,13 @@ export function useEditTodo(todoListId: string) {
   const utils = trpc.useContext();
   return trpc.todo.editTodo.useMutation({
     async onMutate(variables) {
-      await utils.todo.getTodoLists.cancel();
-      const previousData = utils.todo.getTodoLists.getData();
+      await utils.todo.getTodos.cancel();
+      const previousData = utils.todo.getTodos.getData();
 
-      utils.todo.getTodoLists.setData(undefined, (todoLists = []) => {
-        return updateTodoList(todoLists, todoListId, (list) => ({
-          ...list,
-          todos: updateTodo(list.todos, variables.id, (todo) => ({
-            ...todo,
-            ...variables.data,
-          })),
+      utils.todo.getTodos.setData({ todoListId }, (todos = []) => {
+        return updateTodo(todos, variables.id, (todo) => ({
+          ...todo,
+          ...variables.data,
         }));
       });
 
@@ -196,7 +187,7 @@ export function useEditTodo(todoListId: string) {
     },
     onError(_err, _var, context) {
       if (context?.previousData) {
-        utils.todo.getTodoLists.setData(undefined, context.previousData);
+        utils.todo.getTodos.setData({ todoListId }, context.previousData);
       }
     },
     // onSuccess(data, variables) {

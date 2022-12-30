@@ -6,9 +6,15 @@ export const todoRouter = router({
   getTodoLists: protectedProcedure.query(({ ctx }) => {
     return ctx.prisma.todoList.findMany({
       where: { ownerId: ctx.session.user.id },
-      include: { todos: true },
     });
   }),
+  getTodos: protectedProcedure
+    .input(z.object({ todoListId: z.string() }))
+    .query(({ ctx, input }) => {
+      return ctx.prisma.todo.findMany({
+        where: { todoListId: input.todoListId },
+      });
+    }),
   createTodoList: protectedProcedure.mutation(({ ctx }) => {
     return ctx.prisma.todoList.create({
       data: {
