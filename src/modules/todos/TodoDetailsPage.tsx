@@ -1,7 +1,7 @@
 import { type Todo, type TodoList } from "@prisma/client";
 import { type NextPage } from "next";
 import { useRouter } from "next/router";
-import { useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { FaAngleDown } from "react-icons/fa";
 import { MainLayout } from "../layouts/MainLayout";
@@ -18,6 +18,7 @@ import {
 } from "./queries";
 import { TodoCheckbox } from "./TodoCheckbox";
 import TodoItemText from "./TodoItemText";
+import { Field, OneForm, useFieldValue } from "@oneform/react";
 
 const Todo = ({
   id,
@@ -52,31 +53,46 @@ const TodoListDisplay = ({ id }: { id: string }) => {
 
 const TodoListHeader = ({ id }: { id: string }) => {
   const addTodo = useAddTodo(id);
-  const { register, handleSubmit, reset, formState } = useForm<
-    Pick<Todo, "text">
-  >({ defaultValues: { text: "" } });
-  const onSubmit = (data: Pick<Todo, "text">) => {
-    if (addTodo.isLoading) return;
-    addTodo.mutate({ todoListId: id, text: data.text });
-    reset();
-  };
 
+  const handleSubmit = useCallback(
+    ({ registeredValues: data }: { registeredValues: Record<string, any> }) => {
+      if (addTodo.isLoading) return;
+      addTodo.mutate({ todoListId: id, text: data.text });
+    },
+    []
+  );
+
+  return (
+    <OneForm onSubmit={handleSubmit} values={{}}>
+      <Field>
+        <TitleInput name="text" />
+      </Field>
+    </OneForm>
+  );
+};
+
+type TitleInputProps = Pick<
+  React.ComponentPropsWithoutRef<"input">,
+  "name" | "onChange" | "value"
+>;
+const TitleInput = (props: TitleInputProps) => {
+  const text = useFieldValue<string>({ name: "text" });
   return (
     <div className="flex flex-row items-center border-b bg-white p-2 py-4">
       <div className="mx-4">
         <FaAngleDown
           className={
-            formState.dirtyFields.text ? "text-gray-500" : "text-gray-200"
+            text?.value?.length > 0 ? "text-gray-500" : "text-gray-200"
           }
         />
       </div>
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <input
-          className="nice-font-family text-2xl font-thin italic outline-none placeholder:text-gray-300"
-          placeholder="What needs to be done?"
-          {...register("text")}
-        />
-      </form>
+
+      <input
+        className="nice-font-family text-2xl font-thin italic outline-none placeholder:text-gray-300"
+        placeholder="What needs to be done?"
+        type="text"
+        {...props}
+      />
     </div>
   );
 };
