@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useTodo, useEditTodo } from "./queries";
+import { useEditTodo } from "./queries";
 
 export const TodoCheckbox = ({
   id,

@@ -13,7 +13,6 @@ import {
   useChangeTodoListTitle,
   useClearCompletedTodos,
   useDeleteTodoList,
-  useTodo,
   useTodoList,
   useTodos,
 } from "./queries";

@@ -1,6 +1,6 @@
 import type { Todo } from "@prisma/client";
 import { useForm } from "react-hook-form";
-import { useTodo, useEditTodo } from "./queries";
+import { useEditTodo } from "./queries";
 
 export default function TodoItemText({
   id,
