@@ -119,14 +119,14 @@ export function useAddTodo(todoListId: string) {
         utils.todo.getTodos.setData({ todoListId }, context.previousData);
       }
     },
-    onSuccess(data, variables, context) {
-      utils.todo.getTodos.setData({ todoListId }, (todos = []) => {
-        return updateTodo(todos, "_optimistic_id", (todo) => ({
-          ...todo,
-          ...data,
-        }));
-      });
-    },
+    // onSuccess(data, variables, context) {
+    //   utils.todo.getTodos.setData({ todoListId }, (todos = []) => {
+    //     return updateTodo(todos, "_optimistic_id", (todo) => ({
+    //       ...todo,
+    //       ...data,
+    //     }));
+    //   });
+    // },
   });
 }
 
