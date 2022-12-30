@@ -2,7 +2,7 @@ import { Field, OneForm } from "@oneform/react";
 import { useEditTodo } from "./queries";
 import { useCallback } from "react";
 
-export default function TodoItemText({
+export function TodoItemText({
   id,
   todoListId,
   text,

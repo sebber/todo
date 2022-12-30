@@ -3,22 +3,20 @@ import { type NextPage } from "next";
 import { useRouter } from "next/router";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
-import { FaAngleDown } from "react-icons/fa";
 import { MainLayout } from "../layouts/MainLayout";
-import { AngryButton } from "../style/buttons/AngryButton";
-import { Button } from "../style/buttons/Button";
 import { PageTitle } from "../style/text/PageTitle";
 import {
   useAddTodo,
   useChangeTodoListTitle,
-  useClearCompletedTodos,
-  useDeleteTodoList,
   useTodoList,
   useTodos,
 } from "./queries";
 import { TodoCheckbox } from "./TodoCheckbox";
-import TodoItemText from "./TodoItemText";
-import { Field, OneForm, useFieldValue } from "@oneform/react";
+import { TodoItemText } from "./TodoItemText";
+import { Field, OneForm } from "@oneform/react";
+import { ClearCompletedTodosButton } from "./ClearCompletedTodosButton";
+import { DeleteTodoListButton } from "./DeleteTodoListButton";
+import { TitleInput } from "./TitleInput";
 
 const Todo = ({
   id,
@@ -71,32 +69,6 @@ const TodoListHeader = ({ id }: { id: string }) => {
   );
 };
 
-type TitleInputProps = Pick<
-  React.ComponentPropsWithoutRef<"input">,
-  "name" | "onChange" | "value"
->;
-const TitleInput = (props: TitleInputProps) => {
-  const text = useFieldValue<string>({ name: "text" });
-  return (
-    <div className="flex flex-row items-center border-b bg-white p-2 py-4">
-      <div className="mx-4">
-        <FaAngleDown
-          className={
-            text?.value?.length > 0 ? "text-gray-500" : "text-gray-200"
-          }
-        />
-      </div>
-
-      <input
-        className="nice-font-family text-2xl font-thin italic outline-none placeholder:text-gray-300"
-        placeholder="What needs to be done?"
-        type="text"
-        {...props}
-      />
-    </div>
-  );
-};
-
 const TodoListBody = ({ id, todos }: { id: string; todos: Todo[] }) => {
   return (
     <>
@@ -104,31 +76,6 @@ const TodoListBody = ({ id, todos }: { id: string; todos: Todo[] }) => {
         <Todo key={todo.id} todoListId={id} id={todo.id} todo={todo} />
       ))}
     </>
-  );
-};
-
-export const ClearCompletedTodosButton = ({ id }: { id: string }) => {
-  const clearCompletedTodos = useClearCompletedTodos();
-
-  return (
-    <Button onClick={() => clearCompletedTodos.mutate({ id: id })}>
-      Clear completed
-    </Button>
-  );
-};
-
-export const DeleteTodoListButton = ({ id }: { id: string }) => {
-  const deleteTodoList = useDeleteTodoList();
-  const router = useRouter();
-  return (
-    <AngryButton
-      onClick={() => {
-        deleteTodoList.mutate({ id: id });
-        router.push(`/todos`);
-      }}
-    >
-      Delete List
-    </AngryButton>
   );
 };
 
