@@ -125,6 +125,17 @@ export function useAddTodo(todoListId: string) {
         utils.todo.getTodoLists.setData(undefined, context.previousData);
       }
     },
+    onSuccess(data, variables, context) {
+      utils.todo.getTodoLists.setData(undefined, (todoLists = []) => {
+        return updateTodoList(todoLists, todoListId, (list) => ({
+          ...list,
+          todos: updateTodo(list.todos, "_optimistic_id", (todo) => ({
+            ...todo,
+            ...data,
+          })),
+        }));
+      });
+    },
   });
 }
 
